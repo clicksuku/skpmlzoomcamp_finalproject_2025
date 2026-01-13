@@ -1,10 +1,11 @@
+from lzma import is_check_supported
 import requests
 import pandas as pd
 import numpy as np
 import json
 
 url_property_price = "http://127.0.0.1:8000/predict_property_price"
-
+url_superhost = "http://127.0.0.1:8000/predict_superhost"
 
 # List of features used in the model
 interested_features = [
@@ -27,13 +28,32 @@ properties = [
     {"minimum_nights":2,"host_response_rate":100.0,"host_acceptance_rate":92.0,"host_is_superhost":True,"host_identity_verified":True,"accommodates":2,"bathrooms":1.5,"bedrooms":1.0,"beds":2.0,"number_of_reviews":91,"review_scores_rating":4.7,"instant_bookable":False,"entire_home_apt":True,"private_room":False,"shared_room":False,"hotel_room":False,"leopoldstadt":False,"others":True,"margareten":False,"brigittenau":False,"landstrae":False,"ottakring":False,"rudolfsheim_fnfhaus":False,"neubau":False,"alsergrund":False,"meidling":False,"favoriten":False}
 ]
 
+
+
+properties_superhost = [
+  {"host_response_rate":100.0,"host_acceptance_rate":100.0,"host_identity_verified":True,"host_listings_count":17.0,"review_scores_rating":4.93,"review_scores_cleanliness":4.96,"review_scores_communication":4.97,"review_scores_accuracy":4.96,"number_of_reviews":71,"number_of_reviews_ltm":49,"reviews_per_month":1.14,"instant_bookable":True,"calculated_host_listings_count":17,"availability_30":19},
+  {"host_response_rate":100.0,"host_acceptance_rate":100.0,"host_identity_verified":True,"host_listings_count":1.0,"review_scores_rating":4.94,"review_scores_cleanliness":4.97,"review_scores_communication":5.0,"review_scores_accuracy":5.0,"number_of_reviews":33,"number_of_reviews_ltm":33,"reviews_per_month":4.4,"instant_bookable":True,"calculated_host_listings_count":1,"availability_30":7},
+  {"host_response_rate":100.0,"host_acceptance_rate":99.0,"host_identity_verified":True,"host_listings_count":6.0,"review_scores_rating":4.93,"review_scores_cleanliness":4.94,"review_scores_communication":4.9,"review_scores_accuracy":4.93,"number_of_reviews":215,"number_of_reviews_ltm":30,"reviews_per_month":4.5,"instant_bookable":True,"calculated_host_listings_count":6,"availability_30":3},
+  {"host_response_rate":80.0,"host_acceptance_rate":69.0,"host_identity_verified":True,"host_listings_count":1.0,"review_scores_rating":5.0,"review_scores_cleanliness":5.0,"review_scores_communication":5.0,"review_scores_accuracy":5.0,"number_of_reviews":3,"number_of_reviews_ltm":3,"reviews_per_month":1.58,"instant_bookable":False,"calculated_host_listings_count":1,"availability_30":0},
+  {"host_response_rate":100.0,"host_acceptance_rate":100.0,"host_identity_verified":True,"host_listings_count":2.0,"review_scores_rating":4.67,"review_scores_cleanliness":4.44,"review_scores_communication":4.89,"review_scores_accuracy":4.78,"number_of_reviews":9,"number_of_reviews_ltm":7,"reviews_per_month":0.59,"instant_bookable":True,"calculated_host_listings_count":2,"availability_30":10}]
+
+
 df_new_data = pd.DataFrame(properties)
+df_new_data_superhost = pd.DataFrame(properties_superhost)
 
 for index, row in df_new_data.iterrows():
-    print(properties[index])
-    json_string = json.dumps(properties[index])
-    print(json_string)
-    input()
-    predicted_property_price = requests.post(url_property_price, json=properties[index])
-    property_price=np.expm1(predicted_property_price.json()['property_price'])
-    print(f"Property Price: ${property_price}")
+  print(properties[index])
+  json_string = json.dumps(properties[index])
+  print(json_string)
+  predicted_property_price = requests.post(url_property_price, json=properties[index])
+  property_price=np.expm1(predicted_property_price.json()['property_price'])
+  print(f"Property Price: ${property_price}")
+  input()
+
+for index, row in df_new_data_superhost.iterrows():
+  is_superhost = requests.post(url_superhost, json=properties_superhost[index])
+  print(is_superhost)
+  input()
+
+print("\n\n")
+    

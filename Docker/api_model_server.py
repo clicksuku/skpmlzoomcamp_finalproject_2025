@@ -26,3 +26,10 @@ async def predict_property_price(request: AirbnbProperty):
     print(f"DEBUG: Feature order: {X_input.columns.tolist()}")
     print(f"DEBUG: First row values: {X_input.iloc[0].values}")
     return {"property_price": float(y_pred)}
+
+
+@app.post("/predict_superhost")
+async def predict_hit(request: AirbnbProperty):
+    x = dv_classification.transform([request.dict()])
+    y_pred = model_classification.predict_proba(x)[0, 1]
+    return {"probability": float(y_pred)}

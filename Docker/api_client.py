@@ -31,11 +31,12 @@ properties = [
 
 
 properties_superhost = [
-  {"host_response_rate":100.0,"host_acceptance_rate":100.0,"host_identity_verified":True,"host_listings_count":17.0,"review_scores_rating":4.93,"review_scores_cleanliness":4.96,"review_scores_communication":4.97,"review_scores_accuracy":4.96,"number_of_reviews":71,"number_of_reviews_ltm":49,"reviews_per_month":1.14,"instant_bookable":True,"calculated_host_listings_count":17,"availability_30":19},
-  {"host_response_rate":100.0,"host_acceptance_rate":100.0,"host_identity_verified":True,"host_listings_count":1.0,"review_scores_rating":4.94,"review_scores_cleanliness":4.97,"review_scores_communication":5.0,"review_scores_accuracy":5.0,"number_of_reviews":33,"number_of_reviews_ltm":33,"reviews_per_month":4.4,"instant_bookable":True,"calculated_host_listings_count":1,"availability_30":7},
-  {"host_response_rate":100.0,"host_acceptance_rate":99.0,"host_identity_verified":True,"host_listings_count":6.0,"review_scores_rating":4.93,"review_scores_cleanliness":4.94,"review_scores_communication":4.9,"review_scores_accuracy":4.93,"number_of_reviews":215,"number_of_reviews_ltm":30,"reviews_per_month":4.5,"instant_bookable":True,"calculated_host_listings_count":6,"availability_30":3},
-  {"host_response_rate":80.0,"host_acceptance_rate":69.0,"host_identity_verified":True,"host_listings_count":1.0,"review_scores_rating":5.0,"review_scores_cleanliness":5.0,"review_scores_communication":5.0,"review_scores_accuracy":5.0,"number_of_reviews":3,"number_of_reviews_ltm":3,"reviews_per_month":1.58,"instant_bookable":False,"calculated_host_listings_count":1,"availability_30":0},
-  {"host_response_rate":100.0,"host_acceptance_rate":100.0,"host_identity_verified":True,"host_listings_count":2.0,"review_scores_rating":4.67,"review_scores_cleanliness":4.44,"review_scores_communication":4.89,"review_scores_accuracy":4.78,"number_of_reviews":9,"number_of_reviews_ltm":7,"reviews_per_month":0.59,"instant_bookable":True,"calculated_host_listings_count":2,"availability_30":10}]
+  {"host_response_rate":100.0,"host_acceptance_rate":100.0,"host_identity_verified":True,"host_listings_count":3.0,"review_scores_rating":5.0,"review_scores_cleanliness":5.0,"review_scores_communication":5.0,"review_scores_accuracy":5.0,"number_of_reviews":13,"number_of_reviews_ltm":13,"reviews_per_month":4.87,"instant_bookable":False,"calculated_host_listings_count":3,"availability_30":3},
+  {"host_response_rate":96.0,"host_acceptance_rate":88.0,"host_identity_verified":True,"host_listings_count":5.0,"review_scores_rating":4.88,"review_scores_cleanliness":4.88,"review_scores_communication":4.94,"review_scores_accuracy":4.94,"number_of_reviews":16,"number_of_reviews_ltm":2,"reviews_per_month":0.44,"instant_bookable":True,"calculated_host_listings_count":4,"availability_30":5},
+  {"host_response_rate":100.0,"host_acceptance_rate":100.0,"host_identity_verified":True,"host_listings_count":1.0,"review_scores_rating":4.95,"review_scores_cleanliness":4.91,"review_scores_communication":4.95,"review_scores_accuracy":4.95,"number_of_reviews":22,"number_of_reviews_ltm":16,"reviews_per_month":1.62,"instant_bookable":False,"calculated_host_listings_count":1,"availability_30":15},
+  {"host_response_rate":90.0,"host_acceptance_rate":96.0,"host_identity_verified":True,"host_listings_count":1.0,"review_scores_rating":4.85,"review_scores_cleanliness":4.96,"review_scores_communication":4.92,"review_scores_accuracy":4.9,"number_of_reviews":161,"number_of_reviews_ltm":34,"reviews_per_month":1.66,"instant_bookable":True,"calculated_host_listings_count":1,"availability_30":7},
+  {"host_response_rate":100.0,"host_acceptance_rate":100.0,"host_identity_verified":True,"host_listings_count":2.0,"review_scores_rating":5.0,"review_scores_cleanliness":5.0,"review_scores_communication":5.0,"review_scores_accuracy":4.96,"number_of_reviews":26,"number_of_reviews_ltm":14,"reviews_per_month":1.2,"instant_bookable":True,"calculated_host_listings_count":1,"availability_30":3}
+]
 
 
 df_new_data = pd.DataFrame(properties)
@@ -51,9 +52,46 @@ for index, row in df_new_data.iterrows():
   input()
 
 for index, row in df_new_data_superhost.iterrows():
-  is_superhost = requests.post(url_superhost, json=properties_superhost[index])
-  print(is_superhost)
-  input()
-
+    try:
+        # Print which property we're processing
+        print(f"\n{'='*50}")
+        print(f"Processing property {index + 1}/{len(df_new_data_superhost)}")
+        
+        # Make the request
+        response = requests.post(
+            url_superhost, 
+            json=properties_superhost[index],
+            headers={'Content-Type': 'application/json'}
+        )
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            try:
+                # Parse the JSON response
+                result = response.json()
+                probability = result.get('probability', 0)
+                
+                # Format the probability as percentage with 2 decimal places
+                print(f"\nSuperhost probability: {probability:.2%}")
+                
+                # Check if probability is greater than 0.8 (80%)
+                if probability > 0.8:
+                    print("✅ This host is a SuperHost!")
+                else:
+                    print("❌ This is not a SuperHost")
+                    
+                print(f"Full response: {result}")
+            except json.JSONDecodeError:
+                print("Failed to parse JSON response")
+                print(f"Raw response: {response.text}")
+        else:
+            print(f"Request failed with status code: {response.status_code}")
+            print(f"Response: {response.text}")
+            
+    except Exception as e:
+        print(f"Error making request: {str(e)}")
+    
+    input("\nPress Enter to continue to the next property...")
+    print("="*50)
 print("\n\n")
     

@@ -2,8 +2,8 @@ pandas
 numpy
 scikit-learn
 scipy
+xgboost
 threadpoolctl
-jupytext
 seaborn
 uv
 xgboost

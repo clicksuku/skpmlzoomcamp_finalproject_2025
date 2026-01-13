@@ -30,10 +30,10 @@ properties = [
 df_new_data = pd.DataFrame(properties)
 
 for index, row in df_new_data.iterrows():
-    # Convert the row to a dictionary and then to a regular Python dict to ensure JSON serialization works
     print(properties[index])
+    json_string = json.dumps(properties[index])
+    print(json_string)
     input()
     predicted_property_price = requests.post(url_property_price, json=properties[index])
     property_price=np.expm1(predicted_property_price.json()['property_price'])
     print(f"Property Price: ${property_price}")
-    input()

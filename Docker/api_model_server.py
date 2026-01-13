@@ -20,11 +20,9 @@ async def root():
 @app.post("/predict_property_price")
 async def predict_property_price(request: AirbnbProperty):
     X_input = pd.DataFrame([request.dict()])
-    print(X_input)
     expected_features = model_regression.get_booster().feature_names
-    print(expected_features)
     X_input = X_input[expected_features]
-    print(X_input)
     y_pred = model_regression.predict(X_input)
-    print(y_pred)
+    print(f"DEBUG: Feature order: {X_input.columns.tolist()}")
+    print(f"DEBUG: First row values: {X_input.iloc[0].values}")
     return {"property_price": float(y_pred)}

@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 RUN mkdir -p /app/_models
@@ -6,8 +6,8 @@ RUN mkdir -p /app/_models
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY classification_model.bin /app/_models/
-COPY regression_model.json /app/_models/
+COPY classification_model.bin /app/
+COPY regression_model.json /app/
 COPY *.py /app/
 
 CMD ["uvicorn", "api_model_server:app", "--host", "0.0.0.0", "--port", "8000"]

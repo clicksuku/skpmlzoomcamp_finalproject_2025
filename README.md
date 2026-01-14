@@ -8,7 +8,7 @@ The short-term rental market is highly competitive, and pricing or positioning a
 
 -   What is a **fair nightly price** for a listing?
 
--   Which listings are likely to be **high-performing (premium)** versus **standard**?
+-   Which listings are likely to be rented out based on the Host characterestics whether the host is **Superhost** versus **Normal Host**?
 
 This project applies **Machine Learning techniques** on the **Airbnb Vienna public dataset** to solve two core problems:
 
@@ -18,7 +18,7 @@ Predict the **nightly price** of an Airbnb listing based on location, room chara
 
 ### Classification Problem
 
-Classify listings into **Premium vs Non-Premium** categories based on pricing, amenities, and demand-related features.\
+Classify listings into **Host vs Superhost** categories based on pricing, amenities, and demand-related features.\
 This enables better market segmentation and pricing strategy insights.
 
 The project follows an **end-to-end ML lifecycle**: data analysis → modeling → evaluation → deployment using **FastAPI, Docker, and Kubernetes**.
@@ -28,9 +28,11 @@ The project follows an **end-to-end ML lifecycle**: data analysis → modeling �
 2\. Installation and Running the Project
 ----------------------------------------
 
+## Running locally
+
 ### Clone the Repository
 
-`git clone https://github.com/<your-username>/airbnb-vienna-capstone.git cd airbnb-vienna-capstone `
+`git clone https://github.com/clicksuku/skpmlzoomcamp_finalproject_2025.git
 
 ### Create Virtual Environment
 
@@ -55,17 +57,14 @@ The project follows an **end-to-end ML lifecycle**: data analysis → modeling �
 
 ### Key Dataset Files
 
--   `listings.csv` -- Detailed listing-level information
-
--   `reviews.csv` -- Guest review data
-
--   `calendar.csv` -- Availability and pricing over time
+-   `Data/listings.csv` -- Listing-level information
+-   `Data/listings_detailed.csv` -- Detailed listing-level information
+-   'Data/data_dictionary.xlsx' -- Data dictionary of the data considered
 
 ### Key Features Used
 
 | Feature | Description |
 | --- | --- |
-| `latitude`, `longitude` | Geographical location |
 | `room_type` | Entire home / Private room / Shared room |
 | `accommodates` | Number of guests |
 | `bedrooms`, `beds`, `bathrooms` | Property attributes |
@@ -73,7 +72,8 @@ The project follows an **end-to-end ML lifecycle**: data analysis → modeling �
 | `review_scores_rating` | Guest satisfaction |
 | `availability_365` | Demand proxy |
 | `host_is_superhost` | Host quality indicator |
-| `price` | Target variable (Regression) |
+
+| `log_price` | Target variable (Regression) |
 
 ### Data Preprocessing
 
@@ -84,8 +84,16 @@ The project follows an **end-to-end ML lifecycle**: data analysis → modeling �
 -   One-hot encoding for categorical features
 
 -   Missing value imputation
+  
+-   Concatenated listing and listing details
 
--   Feature scaling for linear models
+-   Remove duplicate columns after concatenation
+
+-   Remove NA
+
+-   Room code mapping for room types
+
+-   Removed % from host response rate and host acceptance rate
 
 * * * * *
 
@@ -128,12 +136,156 @@ Gradient Boosting Regressor performed best due to:
 
 * * * * *
 
+***. Key Success Factors:**
+
+**✅**** Neighborhood Features WORKED!**
+
+-   Adding neighborhood information boosted R² by **6.6 percentage points** (0.332 → 0.398)
+-   This confirms location is a major price driver
+-   **Expected gain achieved**: You captured about 1/3 of the potential location effect
+
+**✅**** Proper Encoding:**
+
+-   "Others" is included as a category (coefficient: 0.1056)
+-   This serves as the baseline for neighborhood comparisons
+
+**3\. Feature Analysis by Impact:**
+
+**🏆**** Top Price Drivers (>15% premium):**
+
+1.  **Hotel Room (+67.4%)**: e^0.5153 = 1.674
+2.  **Entire Home/Apt (+43.8%)**: e^0.3633 = 1.438
+3.  **Bathrooms (+18.6%)**: Each additional bathroom
+4.  **Leopoldstadt (+18.4%)**: Premium neighborhood
+5.  **Neubau (+18.0%)**: Premium neighborhood
+
+**Strong Positive Influencers (10-15% premium):**
+
+1.  **Review Scores Rating (+16.4%)**: Quality premium
+2.  **Bedrooms (+15.5%)**: Each additional bedroom
+3.  **Landstraße (+12.5%)**: Above-average neighborhood
+4.  **Superhost (+12.3%)**: Host reputation premium
+5.  **Instant Bookable (+11.2%)**: Convenience premium
+
+**Baseline Neighborhood:**
+
+-   **"Others" (+11.1%)**: Slightly above average - interesting!
+
+-   This means all other neighborhoods are compared to "Others"
+-   Some neighborhoods are below "Others" (negative coefficients)
+
+**Significant Discounts:**
+
+-   **Shared Room (-53.8%)**: Massive discount: e^-0.7708 = 0.462
+-   **Host Identity Verified (-32.8%)**: Surprisingly large negative effect
+-   **Meidling (-14.4%)**, **Ottakring (-16.3%)**: Below-average neighborhoods
+
+**4\. Business Insights & Strategy:**
+
+**Pricing Strategy:**
+
+1.  **Property Type Hierarchy**: Hotel rooms command highest premium, followed by entire homes
+2.  **Location Matters**: Leopoldstadt, Neubau, Landstraße are premium areas
+3.  **Quality Pays**: Higher ratings = 16% price premium
+4.  **Size Premium**: Bathrooms add more value (18.6%) than bedrooms (15.5%)
+
+**Counterintuitive Findings:**
+
+1.  **Host Identity Verified (-32.8%)**: This is suspiciously large
+
+-   Possible issue: New hosts verify identity but charge less?
+-   Check correlation with other variables
+
+3.  **Favoriten, Brigittenau discounts**: Working-class areas as expected
+
+
+**Analysis of Your Correlation Matrix:**
+
+**1\. The Key Finding - Explains the Negative Coefficient:**
+
+**host_identity_verified**** has a NEGATIVE correlation with ****log_price**** (-0.105)**  ✅
+
+This explains why your linear regression gave it a negative coefficient (-0.3970)! The data shows that **verified hosts actually have LOWER prices** on average.
+
+**2\. Detailed Breakdown:**
+
+**A. Host Identity Verified Relationships:**
+
+-   **With log_price: -0.105** → Verified hosts charge **10.5% less** on average (in log space)
+-   **With superhost: 0.092** → Weak positive correlation with being a superhost
+-   **With reviews: 0.112** → Verified hosts have slightly more reviews
+-   **With instant bookable: -0.082** → Verified hosts are LESS likely to offer instant booking
+
+**B. Other Interesting Correlations:**
+
+**Superhost Effects:**
+
+-   **Superhost → Rating: 0.327** → Strong! Superhosts have much higher ratings
+-   **Superhost → Price: 0.128** → Superhosts charge 12.8% MORE (expected)
+-   **Superhost → Instant booking: -0.182** → Superhosts are LESS likely to offer instant booking
+
+**Response/Acceptance Rates:**
+
+-   **Response ↔ Acceptance: 0.552** → Strong correlation - hosts who respond quickly also accept more bookings
+-   **Acceptance → Instant booking: 0.450** → Strong! Hosts who accept more also offer instant booking
+
+**Rating Effects:**
+
+-   **Rating → Price: 0.175** → Higher ratings = 17.5% higher prices (makes sense)
+-   **Rating → Superhost: 0.327** → Higher ratings help become superhost
+-   **Rating → Instant booking: -0.189** → Higher-rated listings are LESS likely to offer instant booking
+
+**3\. Why ****host_identity_verified**** Has Negative Coefficient:**
+
+**Possible Explanations:**
+
+1.  **New Host Effect**: New hosts verify identity but charge less to attract first bookings
+2.  **Budget Host Strategy**: Hosts focusing on budget segment verify but keep prices low
+3.  **Professional vs Casual**: Casual hosts verify but aren't optimizing for max revenue
+4.  **Market Segment**: Verified hosts might dominate budget segments
+
+**Evidence Supporting This:**
+
+-   Verified hosts have more reviews (0.112 correlation) → More established but cheaper
+-   Verified hosts less likely to offer instant booking (-0.082) → Different strategy
+-   Weak correlation with superhost (0.092) → Not the premium hosts
+
+**4\. Business Interpretation:**
+
+**Two Types of Verified Hosts Emerge:**
+
+1.  **Premium Verified Hosts**:
+
+-   Also superhosts (some correlation: 0.092)
+-   Higher ratings
+-   Higher prices
+
+3.  **Budget Verified Hosts**:
+
+-   Verify identity (trust signal)
+-   Charge less to compete
+-   More reviews from volume strategy
+-   Less likely to offer premium features (instant booking)
+
+**7\. Actionable Insights:**
+
+**For Hosts:**
+
+-   **If you verify identity**: Be aware you might be pricing too low
+-   **Combine verification with superhost status** to command premium prices
+
+**For Platform:**
+
+-   Verification alone doesn't command price premium
+-   Need to encourage verified hosts to also pursue superhost status
+-   Consider tiered verification system
+
 5\. Classification Model -- Premium vs Non-Premium Listings
 ----------------------------------------------------------
 
 ### Objective
 
-Classify listings into **Premium** or **Non-Premium** categories.
+Classify listings into **Superhost** or **Normal Host** categories.
 
 ### Target Definition
 

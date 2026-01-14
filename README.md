@@ -329,7 +329,7 @@ jupytext --to py notebooks/airbnb_classification.ipynb `
 7\. Requirements and Installation
 ---------------------------------
 
-### `requirements.txt`
+`requirements.txt`
 
 `pandas
 numpy
@@ -360,11 +360,6 @@ requests `
 | `/predict_superhost` | Predict Superhost |
 | `/health` | Health check |
 
-### Example Request
-
-`curl -X POST http://localhost:8000/predict_price\
--H "Content-Type: application/json"\
--d '{"accommodates":4,"bedrooms":2,"availability_365":180}'  `
 
 * * * * *
 
@@ -393,6 +388,10 @@ Create `k8s/` directory with the following files:
 yaml
 
 # k8s/deployment.yaml
+
+```
+yaml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -439,11 +438,12 @@ spec:
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 5
+```
 
 #### 2\. Service Configuration
 
+```
 yaml
-
 # k8s/service.yaml
 apiVersion: v1
 kind: Service
@@ -457,11 +457,12 @@ spec:
     targetPort: 8000
     protocol: TCP
   type: LoadBalancer
+```
 
 #### 3\. Horizontal Pod Autoscaler
 
+```
 yaml
-
 # k8s/hpa.yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -481,9 +482,12 @@ spec:
       target:
         type: Utilization
         averageUtilization: 70
+```
 
 #### 4\. ConfigMap for Environment Variables
 
+
+```
 yaml
 
 # k8s/configmap.yaml
@@ -495,9 +499,12 @@ data:
   MODEL_VERSION: "1.0.0"
   FEATURE_STORE_URL: "http://feature-store:8080"
   CACHE_TTL: "300"
+```
+
 
 ### Deployment Commands
 
+```
 bash
 
 # Apply Kubernetes configurations
@@ -522,9 +529,11 @@ kubectl scale deployment airbnb-ml-api --replicas=5
 
 # Update deployment (rolling update)
 kubectl set image deployment/airbnb-ml-api airbnb-ml-api=airbnb-vienna-ml:v2.0
+```
 
 ### Testing Kubernetes Deployment
 
+```
 bash
 
 # Get service URL
@@ -534,7 +543,7 @@ minikube service airbnb-ml-service --url
 kubectl get service airbnb-ml-service
 
 # Test API endpoint
-curl -X POST http://<SERVICE_IP>/predict\
+curl -X POST http://<SERVICE_IP>/predict_price\
   -H "Content-Type: application/json"\
   -d '{
     "property_type": "Apartment",
@@ -548,6 +557,7 @@ curl -X POST http://<SERVICE_IP>/predict\
     "has_wifi": true,
     "has_kitchen": true
   }'
+```
 
 * * * * *
 

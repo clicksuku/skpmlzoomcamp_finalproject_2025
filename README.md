@@ -274,7 +274,16 @@ Gradient Boosting Regressor performed best due to:
 
 ### Objective
 
-Classify listings into **Superhost** or **Normal Host** categories.
+This document summarizes the key steps, experiments, evaluation results, and final outcome of the notebook:
+
+- `Notebook/airbnb_classification.ipynb`
+
+The objective of the notebook is to train a **binary classification** model to predict whether a host is a **Superhost**.
+
+- **Task**: Binary classification
+- **Target**: `host_is_superhost`
+- **Prediction**: `P(host_is_superhost = 1)`
+
 
 ### Target Definition
 
@@ -285,34 +294,6 @@ Classify listings into **Superhost** or **Normal Host** categories.
 1.  **Logistic Regression**
 
 2.  **Decision Tree Classifier**
-
-### Evaluation Metrics
-
--   **F1 Score**
-
--   **ROC-AUC**
-
--   **Confusion Matrix**
-
--   **Precision & Recall**
-
-# Airbnb Vienna — Classification Notebook Summary (`airbnb_classification.ipynb`)
-
-This document summarizes the key steps, experiments, evaluation results, and final outcome of the notebook:
-
-- `Notebook/airbnb_classification.ipynb`
-
-The objective of the notebook is to train a **binary classification** model to predict whether a host is a **Superhost**.
-
----
-
-## 1. Objective
-
-- **Task**: Binary classification
-- **Target**: `host_is_superhost`
-- **Prediction**: `P(host_is_superhost = 1)`
-
----
 
 ## 2. Data Loading
 
@@ -649,6 +630,17 @@ This is later loaded by the FastAPI server for inference.
 - Consider adding probability calibration if using probabilities for decision-making.
 - Try tree-based models (e.g., XGBoost classifier) as a comparison baseline.
 - Track metrics at multiple thresholds (0.5, best-F1 threshold, business threshold like 0.8).
+
+
+### Evaluation Metrics
+
+-   **F1 Score**
+
+-   **ROC-AUC**
+
+-   **Confusion Matrix**
+
+-   **Precision & Recall**
 
 
 * * * * *

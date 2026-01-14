@@ -284,3 +284,99 @@ kubectl get svc `
 -   Time-series price forecasting
 
 -   Image-based room quality scoring using CNNs
+
+
+## 13. Evaluation 
+
+
+---
+
+# 🧠 Project Evaluation Rubric
+
+## **Problem Description**
+
+| Points | Description                                                                                                             | Status |
+| :----: | :---------------------------------------------------------------------------------------------------------------------- | :----: |
+|    0   | Problem is not described                                                                                                |        |
+|    1   | Problem is described in README briefly without much details                                                             |    |
+|    2   | Problem is described in README with enough context, so it's clear what the problem is and how the solution will be used |   ✅   |
+
+---
+
+## **Exploratory Data Analysis (EDA)**
+
+| Points | Description                                                                                                                                                                                                       | Status |
+| :----: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----: |
+|    0   | No EDA                                                                                                                                                                                                            |        |
+|    1   | Basic EDA (looking at min–max values, checking for missing values)                                                                                                                                                |    |
+|    2   | Extensive EDA (ranges of values, missing values, analysis of target variable, feature importance analysis). <br>For images: analyzing the content of the images. <br>For texts: frequent words, word clouds, etc. |  ✅   |
+
+---
+
+## **Model Training**
+
+| Points | Description                                                                                                                                                           | Status |
+| :----: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----: |
+|    0   | No model training                                                                                                                                                     |        |
+|    1   | Trained only one model, no parameter tuning                                                                                                                           |        |
+|    2   | Trained multiple models (linear and tree-based). For neural networks: tried multiple variations – with dropout or without, with extra inner layers or without         |    |
+|    3   | Trained multiple models and tuned their parameters. For neural networks: same as previous, but also with tuning (learning rate, dropout rate, inner layer size, etc.) |  ✅   |
+
+---
+
+## **Exporting Notebook to Script**
+
+| Points | Description                                                       | Status |
+| :----: | :---------------------------------------------------------------- | :----: |
+|    0   | No script for training a model                                    |        |
+|    1   | The logic for training the model is exported to a separate script |    ✅   |
+
+---
+
+## **Reproducibility**
+
+| Points | Description                                                                                                                                                                                     | Status |
+| :----: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----: |
+|    0   | Not possible to execute the notebook and the training script. Data is missing or not easily accessible                                                                                          |        |
+|    1   | It's possible to re-execute the notebook and the training script without errors. The dataset is committed in the project repository or there are clear instructions on how to download the data |    ✅   |
+
+---
+
+## **Model Deployment**
+
+| Points | Description                                                     | Status |
+| :----: | :-------------------------------------------------------------- | :----: |
+|    0   | Model is not deployed                                           |        |
+|    1   | Model is deployed (with Flask, BentoML, or a similar framework) |    ✅   |
+
+---
+
+## **Dependency and Environment Management**
+
+| Points | Description                                                                                                                                  | Status |
+| :----: | :------------------------------------------------------------------------------------------------------------------------------------------- | :----: |
+|    0   | No dependency management                                                                                                                     |        |
+|    1   | Provided a file with dependencies (`requirements.txt`, `Pipfile`, `bentofile.yaml`, etc.)                                                    |    |
+|    2   | Provided a file with dependencies **and** used virtual environment. README explains how to install dependencies and activate the environment |  ✅    |
+
+---
+
+## **Containerization**
+
+| Points | Description                                                                                  | Status |
+| :----: | :------------------------------------------------------------------------------------------- | :----: |
+|    0   | No containerization                                                                          |        |
+|    1   | `Dockerfile` is provided or a tool that creates a Docker image is used (e.g., BentoML)       |    |
+|    2   | The application is containerized **and** README describes how to build and run the container |  ✅    |
+
+---
+
+## **Cloud Deployment**
+
+| Points | Description                                                                                                            | Status |
+| :----: | :--------------------------------------------------------------------------------------------------------------------- | :----: |
+|    0   | No deployment to the cloud                                                                                             |        |
+|    1   | Documentation clearly describes (with code) how to deploy the service to cloud or Kubernetes cluster (local or remote) |   ✅    |
+|    2   | Code for cloud/Kubernetes deployment is available, with URL for testing or a video/screenshot of testing it            |     |
+
+---

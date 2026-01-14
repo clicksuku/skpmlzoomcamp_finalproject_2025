@@ -381,22 +381,206 @@ requests `
 
 * * * * *
 
-10\. Kubectl Deployment (Local Kubernetes)
-------------------------------------------
+10\. Kubernetes Deployment
+-------------------------
 
-### Apply Manifests
+### Kubernetes Manifests
 
-`kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml `
+Create `k8s/` directory with the following files:
 
-### Verify
+#### 1\. Deployment Configuration
 
-`kubectl get pods
-kubectl get svc `
+yaml
 
-### Access Service (Minikube)
+# k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbnb-ml-api
+  labels:
+    app: airbnb-ml-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: airbnb-ml-api
+  template:
+    metadata:
+      labels:
+        app: airbnb-ml-api
+    spec:
+      containers:
+      - name: airbnb-ml-api
+        image: airbnb-vienna-ml:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        env:
+        - name: MODEL_PATH
+          value: "/app/models"
+        - name: LOG_LEVEL
+          value: "INFO"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
 
-`minikube service airbnb-vienna-svc --url `
+#### 2\. Service Configuration
+
+yaml
+
+# k8s/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: airbnb-ml-service
+spec:
+  selector:
+    app: airbnb-ml-api
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+  type: LoadBalancer
+
+#### 3\. Horizontal Pod Autoscaler
+
+yaml
+
+# k8s/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: airbnb-ml-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: airbnb-ml-api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+#### 4\. ConfigMap for Environment Variables
+
+yaml
+
+# k8s/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airbnb-ml-config
+data:
+  MODEL_VERSION: "1.0.0"
+  FEATURE_STORE_URL: "http://feature-store:8080"
+  CACHE_TTL: "300"
+
+### Deployment Commands
+
+bash
+
+# Apply Kubernetes configurations
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+kubectl apply -f k8s/hpa.yaml
+
+# Check deployment status
+kubectl get pods
+kubectl get services
+kubectl get hpa
+
+# View logs
+kubectl logs -l app=airbnb-ml-api
+
+# Port forward for local testing
+kubectl port-forward service/airbnb-ml-service 8080:80
+
+# Scale deployment
+kubectl scale deployment airbnb-ml-api --replicas=5
+
+# Update deployment (rolling update)
+kubectl set image deployment/airbnb-ml-api airbnb-ml-api=airbnb-vienna-ml:v2.0
+
+### Testing Kubernetes Deployment
+
+bash
+
+# Get service URL
+minikube service airbnb-ml-service --url
+
+# Or for cloud providers
+kubectl get service airbnb-ml-service
+
+# Test API endpoint
+curl -X POST http://<SERVICE_IP>/predict\
+  -H "Content-Type: application/json"\
+  -d '{
+    "property_type": "Apartment",
+    "room_type": "Entire home/apt",
+    "accommodates": 2,
+    "bedrooms": 1,
+    "bathrooms": 1.0,
+    "neighborhood": "Leopoldstadt",
+    "review_scores_rating": 92.5,
+    "amenities_count": 10,
+    "has_wifi": true,
+    "has_kitchen": true
+  }'
+
+* * * * *
+
+10\. Project Characterestics
+-----------------------
+
+### Business Impact
+
+-   **Price Optimization**: Helps hosts maximize revenue
+
+-   **Market Analysis**: Identifies factors affecting pricing
+
+-   **User Experience**: Better search and filtering for guests
+
+### Technical Achievements
+
+-   **Model Performance**: XGBoost achieved 0.809 R² (regression) and 0.834 accuracy (classification)
+
+-   **Scalability**: Containerized deployment with auto-scaling
+
+-   **Maintainability**: Modular code structure with comprehensive documentation
+
+### Future Improvements
+
+1.  **Real-time Features**: Incorporate seasonal demand data
+
+2.  **Ensemble Methods**: Stacking/blending multiple models
+
+3.  **A/B Testing**: Deploy new models with canary releases
+
+4.  **Feature Store**: Implement for consistent feature engineering
+
+5.  **MLOps Pipeline**: Automated retraining and monitoring
 
 * * * * *
 
@@ -415,17 +599,21 @@ kubectl get svc `
 
 * * * * *
 
-12\. Future Improvements
-------------------------
+12\. Contributing
+-----------------
 
--   Incorporate **calendar-level demand modeling**
+1.  Fork the repository
 
--   Add **spatial clustering** (HDBSCAN)
+2.  Create a feature branch
 
--   Time-series price forecasting
+3.  Add tests for new functionality
 
--   Image-based room quality scoring using CNNs
+4.  Ensure all tests pass
 
+5.  Submit a pull request
+
+
+* * * * *
 
 ## 13. Evaluation 
 

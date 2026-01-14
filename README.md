@@ -295,7 +295,7 @@ The objective of the notebook is to train a **binary classification** model to p
 
 2.  **Decision Tree Classifier**
 
-## 2. Data Loading
+### Data Loading
 
 The notebook loads two Vienna Airbnb datasets and then merges them:
 
@@ -306,11 +306,11 @@ They are concatenated column-wise and duplicate columns are removed.
 
 ---
 
-## 3. Feature Set Definition
+### Feature Set Definition
 
 Features are defined in groups.
 
-### 3.1 Host features
+#### Host features
 
 - `host_response_rate`
 - `host_acceptance_rate`
@@ -318,7 +318,7 @@ Features are defined in groups.
 - `host_listings_count`
 - `host_is_superhost` *(this is the target, later separated)*
 
-### 3.2 Review features
+#### Review features
 
 - `review_scores_rating`
 - `review_scores_cleanliness`
@@ -328,13 +328,13 @@ Features are defined in groups.
 - `number_of_reviews_ltm`
 - `reviews_per_month`
 
-### 3.3 Listing features
+#### Listing features
 
 - `instant_bookable`
 - `calculated_host_listings_count`
 - `availability_30`
 
-### 3.4 Categorical features
+#### Categorical features
 
 - `room_type`
 - `neighbourhood`
@@ -363,18 +363,18 @@ All features combined:
 
 ---
 
-## 4. Data Cleaning & Feature Engineering
+### Data Cleaning & Feature Engineering
 
 The notebook performs a clear end-to-end preprocessing pipeline via helper functions.
 
-### 4.1 Merge and subset
+#### Merge and subset
 
 - Concatenate `listings` and `listings_detailed`
 - Remove duplicated columns
 - Keep only `all_features`
 - Drop rows with missing values: `dropna()`
 
-### 4.2 Normalize percentage columns
+#### Normalize percentage columns
 
 These are originally strings like `"96%"`:
 
@@ -386,11 +386,11 @@ Processing:
 - remove `%`
 - cast to `float`
 
-### 4.3 One-hot encode `room_type`
+#### One-hot encode `room_type`
 
 The notebook creates a boolean column per unique `room_type` value and drops the original `room_type` column.
 
-### 4.4 Convert `t` / `f` flags to boolean
+#### Convert `t` / `f` flags to boolean
 
 For columns:
 
@@ -402,14 +402,14 @@ Mapping:
 
 - `t -> 1`, `f -> 0`, then cast to `bool`
 
-### 4.5 Fix encoding issues in neighbourhood
+#### Fix encoding issues in neighbourhood
 
 `neighbourhood` values may have encoding artifacts. The notebook attempts:
 
 - `latin1` encode
 - `utf-8` decode (ignore errors)
 
-### 4.6 Group neighbourhoods into top-N + "Others"
+#### Group neighbourhoods into top-N + "Others"
 
 To avoid high-cardinality neighbourhoods, it groups:
 
@@ -418,13 +418,13 @@ To avoid high-cardinality neighbourhoods, it groups:
 
 Then it one-hot encodes the grouped neighbourhoods and drops original neighbourhood columns.
 
-### 4.7 Column standardization
+#### Column standardization
 
 - replace `/` with `_`
 - lowercase
 - replace spaces with `_`
 
-### 4.8 Final cleaned dataset size
+#### Final cleaned dataset size
 
 After cleaning:
 
@@ -432,7 +432,7 @@ After cleaning:
 
 ---
 
-## 5. Train/Validation/Test Split
+### Train/Validation/Test Split
 
 The notebook creates a dataset that still contains the target column and then splits:
 
@@ -454,9 +454,9 @@ The target vectors are created (`y_train`, `y_val`, `y_test`) and then `host_is_
 
 ---
 
-## 6. Baseline Model
+### Baseline Model
 
-### 6.1 Baseline logistic regression
+####  Baseline logistic regression
 
 A baseline model is trained:
 
@@ -470,7 +470,7 @@ The prediction used is:
 
 - `y_pred_val = predict_proba(X_val)[:, 1]`
 
-### 6.2 Baseline ROC AUC
+#### Baseline ROC AUC
 
 Baseline validation ROC AUC:
 
@@ -480,7 +480,7 @@ This is a good baseline, showing the signal in host/review/listing features.
 
 ---
 
-## 7. Threshold / Precision-Recall Analysis
+### Threshold / Precision-Recall Analysis
 
 A custom function `p_r_dataframe` computes precision, recall, and F1 score across thresholds from 0 to 1.
 
@@ -495,7 +495,7 @@ Interpretation:
 
 ---
 
-## 8. Cross-Validation for Regularization (C)
+### Cross-Validation for Regularization (C)
 
 The notebook performs 5-fold CV across values of `C`:
 
@@ -521,7 +521,7 @@ Observation:
 
 ---
 
-## 9. GridSearchCV (Final Model Selection)
+### GridSearchCV (Final Model Selection)
 
 A `GridSearchCV` is run on Logistic Regression (balanced class weights):
 
@@ -546,16 +546,16 @@ The CV table shows a plateau from `C=10` to `C=100`.
 
 ---
 
-## 10. Final Evaluation (Validation Set)
+### Final Evaluation (Validation Set)
 
 Using the best estimator from GridSearchCV, evaluation is computed on the validation set.
 
-### 10.1 Metrics
+#### Metrics
 
 - **F1 score**: **0.6903**
 - **ROC AUC**: **0.8472**
 
-### 10.2 Confusion matrix
+#### Confusion matrix
 
 ```text
 [[757 359]
@@ -568,7 +568,7 @@ Interpretation (with `class_weight='balanced'`):
 
 ---
 
-## 11. Exported Artifact
+### Exported Artifact
 
 The final output is a pickled artifact saved to:
 
@@ -582,11 +582,11 @@ This is later loaded by the FastAPI server for inference.
 
 ---
 
-# Analysis of Approaches, Results, and Final Outcome
+### Analysis of Approaches, Results, and Final Outcome
 
-## A. What approaches were tried?
+### A. What approaches were tried?
 
-### A1. Baseline logistic regression (simple train/val)
+#### A1. Baseline logistic regression (simple train/val)
 
 - Pros:
   - Quick baseline
@@ -595,36 +595,36 @@ This is later loaded by the FastAPI server for inference.
   - Hyperparameters not tuned
   - Threshold not optimized
 
-### A2. Threshold analysis using Precision/Recall and F1
+#### A2. Threshold analysis using Precision/Recall and F1
 
 - The notebook explicitly searches thresholds and finds **~0.33** works best for F1.
 - This is important because:
   - If Superhost is rarer, using 0.5 can under-predict positives.
 
-### A3. K-Fold CV for regularization strength (C)
+#### A3. K-Fold CV for regularization strength (C)
 
 - Evaluates how stable ROC AUC is across folds.
 - Helps detect overfitting/underfitting behavior as `C` changes.
 
-### A4. GridSearchCV (final selection)
+#### A4. GridSearchCV (final selection)
 
 - Uses `class_weight='balanced'` which is appropriate for imbalanced labels.
 - Selects `C=100` with best mean ROC AUC.
 
-## B. Key results
+### B. Key results
 
 - Baseline validation ROC AUC: **0.8233**
 - Best CV ROC AUC (GridSearch): **0.8401**
 - Validation ROC AUC (final model): **0.8472**
 - Validation F1 (final model): **0.6903**
 
-## C. What is the final outcome?
+### C. What is the final outcome?
 
 - A tuned **Logistic Regression** classifier (with `class_weight='balanced'` and `C=100`).
 - A production-ready artifact:
   - `classification_model.bin` containing both model and feature vectorizer.
 
-## D. Notes / Potential improvements
+### D. Notes / Potential improvements
 
 - Consider evaluating on the held-out **test set** (currently the notebook evaluates on validation).
 - Consider adding probability calibration if using probabilities for decision-making.

@@ -296,11 +296,360 @@ Classify listings into **Superhost** or **Normal Host** categories.
 
 -   **Precision & Recall**
 
-### Observations
+# Airbnb Vienna — Classification Notebook Summary (`airbnb_classification.ipynb`)
 
--   Logistic Regression offered better generalization
+This document summarizes the key steps, experiments, evaluation results, and final outcome of the notebook:
 
--   Decision Trees captured non-linear splits but overfit without pruning
+- `Notebook/airbnb_classification.ipynb`
+
+The objective of the notebook is to train a **binary classification** model to predict whether a host is a **Superhost**.
+
+---
+
+## 1. Objective
+
+- **Task**: Binary classification
+- **Target**: `host_is_superhost`
+- **Prediction**: `P(host_is_superhost = 1)`
+
+---
+
+## 2. Data Loading
+
+The notebook loads two Vienna Airbnb datasets and then merges them:
+
+- `../data/listings.csv`
+- `../data/listings_detailed.csv`
+
+They are concatenated column-wise and duplicate columns are removed.
+
+---
+
+## 3. Feature Set Definition
+
+Features are defined in groups.
+
+### 3.1 Host features
+
+- `host_response_rate`
+- `host_acceptance_rate`
+- `host_identity_verified`
+- `host_listings_count`
+- `host_is_superhost` *(this is the target, later separated)*
+
+### 3.2 Review features
+
+- `review_scores_rating`
+- `review_scores_cleanliness`
+- `review_scores_communication`
+- `review_scores_accuracy`
+- `number_of_reviews`
+- `number_of_reviews_ltm`
+- `reviews_per_month`
+
+### 3.3 Listing features
+
+- `instant_bookable`
+- `calculated_host_listings_count`
+- `availability_30`
+
+### 3.4 Categorical features
+
+- `room_type`
+- `neighbourhood`
+
+All features combined:
+
+```text
+['host_response_rate',
+ 'host_acceptance_rate',
+ 'host_identity_verified',
+ 'host_listings_count',
+ 'host_is_superhost',
+ 'review_scores_rating',
+ 'review_scores_cleanliness',
+ 'review_scores_communication',
+ 'review_scores_accuracy',
+ 'number_of_reviews',
+ 'number_of_reviews_ltm',
+ 'reviews_per_month',
+ 'instant_bookable',
+ 'calculated_host_listings_count',
+ 'availability_30',
+ 'room_type',
+ 'neighbourhood']
+```
+
+---
+
+## 4. Data Cleaning & Feature Engineering
+
+The notebook performs a clear end-to-end preprocessing pipeline via helper functions.
+
+### 4.1 Merge and subset
+
+- Concatenate `listings` and `listings_detailed`
+- Remove duplicated columns
+- Keep only `all_features`
+- Drop rows with missing values: `dropna()`
+
+### 4.2 Normalize percentage columns
+
+These are originally strings like `"96%"`:
+
+- `host_response_rate`
+- `host_acceptance_rate`
+
+Processing:
+
+- remove `%`
+- cast to `float`
+
+### 4.3 One-hot encode `room_type`
+
+The notebook creates a boolean column per unique `room_type` value and drops the original `room_type` column.
+
+### 4.4 Convert `t` / `f` flags to boolean
+
+For columns:
+
+- `instant_bookable`
+- `host_identity_verified`
+- `host_is_superhost`
+
+Mapping:
+
+- `t -> 1`, `f -> 0`, then cast to `bool`
+
+### 4.5 Fix encoding issues in neighbourhood
+
+`neighbourhood` values may have encoding artifacts. The notebook attempts:
+
+- `latin1` encode
+- `utf-8` decode (ignore errors)
+
+### 4.6 Group neighbourhoods into top-N + "Others"
+
+To avoid high-cardinality neighbourhoods, it groups:
+
+- neighbourhoods with count >= `min_count` (300)
+- all others become `Others`
+
+Then it one-hot encodes the grouped neighbourhoods and drops original neighbourhood columns.
+
+### 4.7 Column standardization
+
+- replace `/` with `_`
+- lowercase
+- replace spaces with `_`
+
+### 4.8 Final cleaned dataset size
+
+After cleaning:
+
+- total rows: **8690**
+
+---
+
+## 5. Train/Validation/Test Split
+
+The notebook creates a dataset that still contains the target column and then splits:
+
+- **Train+Val**: 80%
+- **Test**: 20%
+
+Then splits Train+Val into:
+
+- **Train**: 60% (of total)
+- **Validation**: 20% (of total)
+
+Based on the printed sizes:
+
+- Train: **5214**
+- Validation: **1738**
+- Test: **1738**
+
+The target vectors are created (`y_train`, `y_val`, `y_test`) and then `host_is_superhost` is removed from feature frames.
+
+---
+
+## 6. Baseline Model
+
+### 6.1 Baseline logistic regression
+
+A baseline model is trained:
+
+- `LogisticRegression(solver='liblinear', C=1.0, max_iter=2000, random_state=42)`
+
+The features are vectorized using:
+
+- `DictVectorizer()`
+
+The prediction used is:
+
+- `y_pred_val = predict_proba(X_val)[:, 1]`
+
+### 6.2 Baseline ROC AUC
+
+Baseline validation ROC AUC:
+
+- **0.8233**
+
+This is a good baseline, showing the signal in host/review/listing features.
+
+---
+
+## 7. Threshold / Precision-Recall Analysis
+
+A custom function `p_r_dataframe` computes precision, recall, and F1 score across thresholds from 0 to 1.
+
+Best threshold by F1 on validation was found at:
+
+- **threshold ≈ 0.33**
+
+Interpretation:
+
+- The default 0.5 threshold is not necessarily optimal.
+- Since superhost can be imbalanced, lowering the threshold can improve recall and F1.
+
+---
+
+## 8. Cross-Validation for Regularization (C)
+
+The notebook performs 5-fold CV across values of `C`:
+
+- `[0.001, 0.01, 0.1, 0.5, 1, 5, 10]`
+
+Metric:
+
+- ROC AUC
+
+Mean CV AUC results (approx):
+
+- `C=0.001` -> **0.781**
+- `C=0.01` -> **0.824**
+- `C=0.1` -> **0.838**
+- `C=0.5` -> **0.839**
+- `C=1` -> **0.839**
+- `C=5` -> **0.840**
+- `C=10` -> **0.840**
+
+Observation:
+
+- Performance improves quickly as `C` increases, then plateaus.
+
+---
+
+## 9. GridSearchCV (Final Model Selection)
+
+A `GridSearchCV` is run on Logistic Regression (balanced class weights):
+
+- solver: `lbfgs`
+- `class_weight='balanced'`
+- scoring: `roc_auc`
+- CV folds: 5
+
+Parameter grid:
+
+- `C: [0.001, 0.01, 0.1, 1, 10, 100]`
+
+Best parameter:
+
+- **Best C = 100**
+
+Best cross-validated ROC AUC:
+
+- **0.8401**
+
+The CV table shows a plateau from `C=10` to `C=100`.
+
+---
+
+## 10. Final Evaluation (Validation Set)
+
+Using the best estimator from GridSearchCV, evaluation is computed on the validation set.
+
+### 10.1 Metrics
+
+- **F1 score**: **0.6903**
+- **ROC AUC**: **0.8472**
+
+### 10.2 Confusion matrix
+
+```text
+[[757 359]
+ [105 517]]
+```
+
+Interpretation (with `class_weight='balanced'`):
+
+- The model prioritizes recall for the positive class (Superhost), at the cost of more false positives.
+
+---
+
+## 11. Exported Artifact
+
+The final output is a pickled artifact saved to:
+
+- `../_models/classification_model.bin`
+
+Contents:
+
+- `(final_classification_model, dv_log_reg)`
+
+This is later loaded by the FastAPI server for inference.
+
+---
+
+# Analysis of Approaches, Results, and Final Outcome
+
+## A. What approaches were tried?
+
+### A1. Baseline logistic regression (simple train/val)
+
+- Pros:
+  - Quick baseline
+  - Establishes a starting AUC (0.823)
+- Cons:
+  - Hyperparameters not tuned
+  - Threshold not optimized
+
+### A2. Threshold analysis using Precision/Recall and F1
+
+- The notebook explicitly searches thresholds and finds **~0.33** works best for F1.
+- This is important because:
+  - If Superhost is rarer, using 0.5 can under-predict positives.
+
+### A3. K-Fold CV for regularization strength (C)
+
+- Evaluates how stable ROC AUC is across folds.
+- Helps detect overfitting/underfitting behavior as `C` changes.
+
+### A4. GridSearchCV (final selection)
+
+- Uses `class_weight='balanced'` which is appropriate for imbalanced labels.
+- Selects `C=100` with best mean ROC AUC.
+
+## B. Key results
+
+- Baseline validation ROC AUC: **0.8233**
+- Best CV ROC AUC (GridSearch): **0.8401**
+- Validation ROC AUC (final model): **0.8472**
+- Validation F1 (final model): **0.6903**
+
+## C. What is the final outcome?
+
+- A tuned **Logistic Regression** classifier (with `class_weight='balanced'` and `C=100`).
+- A production-ready artifact:
+  - `classification_model.bin` containing both model and feature vectorizer.
+
+## D. Notes / Potential improvements
+
+- Consider evaluating on the held-out **test set** (currently the notebook evaluates on validation).
+- Consider adding probability calibration if using probabilities for decision-making.
+- Try tree-based models (e.g., XGBoost classifier) as a comparison baseline.
+- Track metrics at multiple thresholds (0.5, best-F1 threshold, business threshold like 0.8).
+
 
 * * * * *
 

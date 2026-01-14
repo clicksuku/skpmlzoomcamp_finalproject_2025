@@ -72,28 +72,26 @@ The project follows an **end-to-end ML lifecycle**: data analysis → modeling �
 | `review_scores_rating` | Guest satisfaction |
 | `availability_365` | Demand proxy |
 | `host_is_superhost` | Host quality indicator |
-
 | `log_price` | Target variable (Regression) |
 
 ### Data Preprocessing
 
--   Currency normalization and price cleaning
-
--   Outlier removal using IQR
-
--   One-hot encoding for categorical features
-
--   Missing value imputation
-  
 -   Concatenated listing and listing details
 
 -   Remove duplicate columns after concatenation
 
 -   Remove NA
 
+-   Missing value imputation
+
 -   Room code mapping for room types
 
 -   Removed % from host response rate and host acceptance rate
+-   Currency normalization and price cleaning
+
+-   Outlier removal using IQR
+
+-   One-hot encoding for categorical features
 
 * * * * *
 
@@ -134,22 +132,19 @@ Gradient Boosting Regressor performed best due to:
 
 -   Superior RMSE and R² scores
 
-* * * * *
-
-***. Key Success Factors:**
+***. Key Observaions from Regression:**
 
 **✅**** Neighborhood Features WORKED!**
 
 -   Adding neighborhood information boosted R² by **6.6 percentage points** (0.332 → 0.398)
 -   This confirms location is a major price driver
--   **Expected gain achieved**: You captured about 1/3 of the potential location effect
 
 **✅**** Proper Encoding:**
 
--   "Others" is included as a category (coefficient: 0.1056)
+-   "Others" (locations beyond top 10 is categorized as 'Others') in Neighbourhood is included as a category (coefficient: 0.1056)
 -   This serves as the baseline for neighborhood comparisons
 
-**3\. Feature Analysis by Impact:**
+***\. Feature Analysis by Impact:***
 
 **🏆**** Top Price Drivers (>15% premium):**
 
@@ -180,9 +175,9 @@ Gradient Boosting Regressor performed best due to:
 -   **Host Identity Verified (-32.8%)**: Surprisingly large negative effect
 -   **Meidling (-14.4%)**, **Ottakring (-16.3%)**: Below-average neighborhoods
 
-**4\. Business Insights & Strategy:**
+***\. Business Insights & Strategy:**
 
-**Pricing Strategy:**
+***Pricing Strategy:***
 
 1.  **Property Type Hierarchy**: Hotel rooms command highest premium, followed by entire homes
 2.  **Location Matters**: Leopoldstadt, Neubau, Landstraße are premium areas
@@ -191,23 +186,15 @@ Gradient Boosting Regressor performed best due to:
 
 **Counterintuitive Findings:**
 
-1.  **Host Identity Verified (-32.8%)**: This is suspiciously large
+ **Host Identity Verified (-32.8%)**: This is suspiciously large
 
 -   Possible issue: New hosts verify identity but charge less?
 -   Check correlation with other variables
 
-3.  **Favoriten, Brigittenau discounts**: Working-class areas as expected
+  **Favoriten, Brigittenau discounts**: Working-class areas as expected
 
 
-**Analysis of Your Correlation Matrix:**
-
-**1\. The Key Finding - Explains the Negative Coefficient:**
-
-**host_identity_verified**** has a NEGATIVE correlation with ****log_price**** (-0.105)**  ✅
-
-This explains why your linear regression gave it a negative coefficient (-0.3970)! The data shows that **verified hosts actually have LOWER prices** on average.
-
-**2\. Detailed Breakdown:**
+***\. Detailed Breakdown:***
 
 **A. Host Identity Verified Relationships:**
 
@@ -235,7 +222,7 @@ This explains why your linear regression gave it a negative coefficient (-0.3970
 -   **Rating → Superhost: 0.327** → Higher ratings help become superhost
 -   **Rating → Instant booking: -0.189** → Higher-rated listings are LESS likely to offer instant booking
 
-**3\. Why ****host_identity_verified**** Has Negative Coefficient:**
+***\. Why ****host_identity_verified**** Has Negative Coefficient:**
 
 **Possible Explanations:**
 
@@ -250,7 +237,7 @@ This explains why your linear regression gave it a negative coefficient (-0.3970
 -   Verified hosts less likely to offer instant booking (-0.082) → Different strategy
 -   Weak correlation with superhost (0.092) → Not the premium hosts
 
-**4\. Business Interpretation:**
+**\. Business Interpretation:**
 
 **Two Types of Verified Hosts Emerge:**
 
@@ -260,14 +247,14 @@ This explains why your linear regression gave it a negative coefficient (-0.3970
 -   Higher ratings
 -   Higher prices
 
-3.  **Budget Verified Hosts**:
+2.  **Budget Verified Hosts**:
 
 -   Verify identity (trust signal)
 -   Charge less to compete
 -   More reviews from volume strategy
 -   Less likely to offer premium features (instant booking)
 
-**7\. Actionable Insights:**
+**\. Actionable Insights:**
 
 **For Hosts:**
 
@@ -280,6 +267,8 @@ This explains why your linear regression gave it a negative coefficient (-0.3970
 -   Need to encourage verified hosts to also pursue superhost status
 -   Consider tiered verification system
 
+* * * * *
+
 5\. Classification Model -- Premium vs Non-Premium Listings
 ----------------------------------------------------------
 
@@ -289,7 +278,7 @@ Classify listings into **Superhost** or **Normal Host** categories.
 
 ### Target Definition
 
-`premium = 1  if price > median_price else  0  `
+`Superhost = 1  if probability > 80%  `
 
 ### Models Implemented
 
@@ -368,7 +357,7 @@ requests `
 | Endpoint | Description |
 | --- | --- |
 | `/predict_price` | Predict nightly price |
-| `/predict_premium` | Predict premium probability |
+| `/predict_superhost` | Predict Superhost |
 | `/health` | Health check |
 
 ### Example Request
@@ -384,11 +373,11 @@ requests `
 
 ### Build Docker Image
 
-`docker build -t airbnb-vienna:latest . `
+`docker build -t skp-airbnb-vienna:latest . `
 
 ### Run Container
 
-`docker run -p 8000:8000 airbnb-vienna:latest `
+`docker run -p 8000:8000 skp-airbnb-vienna:latest `
 
 * * * * *
 

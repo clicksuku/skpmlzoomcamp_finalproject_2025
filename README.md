@@ -395,110 +395,50 @@ yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: airbnb-ml-api
+  name: airbnb-vienna-deployment
   labels:
-    app: airbnb-ml-api
+    app: airbnb-vienna
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: airbnb-ml-api
+      app: airbnb-vienna
   template:
     metadata:
       labels:
-        app: airbnb-ml-api
+        app: airbnb-vienna
     spec:
       containers:
-      - name: airbnb-ml-api
-        image: airbnb-vienna-ml:latest
+      - name: airbnb-model-api
+        image: mlcampfinal:latest
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8000
-        env:
-        - name: MODEL_PATH
-          value: "/app/models"
-        - name: LOG_LEVEL
-          value: "INFO"
+        - containerPort: 8000 
         resources:
           requests:
-            memory: "512Mi"
+            memory: "256Mi"
             cpu: "250m"
           limits:
-            memory: "1Gi"
+            memory: "512Mi"
             cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 5
 ```
 
 #### 2\. Service Configuration
 
 ```
 yaml
-# k8s/service.yaml
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: airbnb-ml-service
+  name: airbnb-vienna-service
 spec:
   selector:
-    app: airbnb-ml-api
+    app: airbnb-vienna 
   ports:
-  - port: 80
-    targetPort: 8000
-    protocol: TCP
-  type: LoadBalancer
-```
-
-#### 3\. Horizontal Pod Autoscaler
-
-```
-yaml
-# k8s/hpa.yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: airbnb-ml-hpa
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: airbnb-ml-api
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-```
-
-#### 4\. ConfigMap for Environment Variables
-
-
-```
-yaml
-
-# k8s/configmap.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: airbnb-ml-config
-data:
-  MODEL_VERSION: "1.0.0"
-  FEATURE_STORE_URL: "http://feature-store:8080"
-  CACHE_TTL: "300"
+    - protocol: TCP
+      port: 8000         
+      targetPort: 8000  
 ```
 
 
@@ -508,28 +448,21 @@ data:
 bash
 
 # Apply Kubernetes configurations
-kubectl apply -f k8s/configmap.yaml
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
-kubectl apply -f k8s/hpa.yaml
 
 # Check deployment status
 kubectl get pods
 kubectl get services
-kubectl get hpa
 
-# View logs
-kubectl logs -l app=airbnb-ml-api
-
-# Port forward for local testing
-kubectl port-forward service/airbnb-ml-service 8080:80
-
-# Scale deployment
-kubectl scale deployment airbnb-ml-api --replicas=5
-
-# Update deployment (rolling update)
-kubectl set image deployment/airbnb-ml-api airbnb-ml-api=airbnb-vienna-ml:v2.0
 ```
+
+#### Kubectl port forward for the client to access
+
+```
+kubectl port-forward service/airbnb-vienna-service 8000:8000
+```
+
 
 ### Testing Kubernetes Deployment
 
@@ -537,12 +470,18 @@ kubectl set image deployment/airbnb-ml-api airbnb-ml-api=airbnb-vienna-ml:v2.0
 bash
 
 # Get service URL
-minikube service airbnb-ml-service --url
+minikube service airbnb-vienna-service --url
 
 # Or for cloud providers
-kubectl get service airbnb-ml-service
+kubectl get service airbnb-vienna-service
 
 # Test API endpoint
+
+'''
+python api_client.py
+'''
+
+'''
 curl -X POST http://<SERVICE_IP>/predict_price\
   -H "Content-Type: application/json"\
   -d '{

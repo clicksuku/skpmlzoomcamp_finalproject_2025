@@ -269,7 +269,7 @@ Gradient Boosting Regressor performed best due to:
 
 * * * * *
 
-5\. Classification Model -- Premium vs Non-Premium Listings
+5\. Classification Model -- Host vs Superhost Listings
 ----------------------------------------------------------
 
 ### Objective

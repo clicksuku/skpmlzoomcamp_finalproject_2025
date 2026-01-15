@@ -6,6 +6,8 @@ import json
 
 url_property_price = "http://127.0.0.1:8000/predict_property_price"
 url_superhost = "http://127.0.0.1:8000/predict_superhost"
+url_room_keras = "http://127.0.0.1:8000/predict_room_keras"
+url_room_onnx = "http://127.0.0.1:8000/predict_room_onnx"
 
 # List of features used in the model
 interested_features = [
@@ -49,7 +51,7 @@ for index, row in df_new_data.iterrows():
   predicted_property_price = requests.post(url_property_price, json=properties[index])
   property_price=np.expm1(predicted_property_price.json()['property_price'])
   print(f"Property Price: ${property_price}")
-  input()
+  input("\nPress Enter to continue to the next property...")
 
 for index, row in df_new_data_superhost.iterrows():
     try:
@@ -93,5 +95,35 @@ for index, row in df_new_data_superhost.iterrows():
     
     input("\nPress Enter to continue to the next property...")
     print("="*50)
+
+img_path = ["../data_room_classifier/living_room.jpg",
+            "../data_room_classifier/dining_room.jpg",
+            "../data_room_classifier/Kitchen.jpg",
+            "../data_room_classifier/Kitchen2.jpg"]
+
+for i in range(4):
+    image_path = img_path[i]
+    with open(image_path, 'rb') as image:
+        response = requests.post(url_room_keras, files={'image': image})
+    print(f"/predict_room status_code: {response.status_code}")
+    try:
+        print(response.json())
+    except Exception:
+        print("Non-JSON response received from server:")
+        print(response.text)
+    input("\nPress Enter to continue to the next image...")
+
+
+for i in range(4):
+    image_path = img_path[i]
+    with open(image_path, 'rb') as image:
+        response = requests.post(url_room_onnx, files={'image': image})
+    print(f"/predict_room status_code: {response.status_code}")
+    try:
+        print(response.json())
+    except Exception:
+        print("Non-JSON response received from server:")
+        print(response.text)
+    input("\nPress Enter to continue to the next image...")
+
 print("\n\n")
-    

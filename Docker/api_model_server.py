@@ -1,17 +1,47 @@
 import pickle
 import xgboost as xgb
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from AirbnbProperty import AirbnbProperty
 from AirbnbSuperhost import AirbnbSuperhost
 
+from tensorflow.keras.preprocessing import image as keras_image
+import onnxruntime as ort
+
+import tensorflow as tf
+import numpy as np
+from io import BytesIO
+
 app = FastAPI()
+
+IMG_SIZE = (224, 224)
+class_names = [
+    'closet', 'computerroom', 'corridor', 'dining_room', 'elevator', 
+     'gameroom', 'garage', 'gym', 'kitchen', 'livingroom', 'lobby', 'meeting_room', 
+     'office', 'pantry', 'restaurant', 'restaurant_kitchen', 'tv_studio', 'waitingroom']
 
 with open('classification_model.bin', 'rb') as f_in: # very important to use 'rb' here, it means read-binary 
     model_classification, dv_classification = pickle.load(f_in)
 
 model_regression = xgb.XGBRegressor()
 model_regression.load_model('regression_model.json')
+
+model_room_keras = tf.keras.models.load_model("cnn_room_classifier_effnet.keras")
+
+ort_session = ort.InferenceSession(
+    "../_models/cnn_room_classifier_effnet.onnx",
+    providers=["CPUExecutionProvider"]
+)
+input_name = ort_session.get_inputs()[0].name
+output_name = ort_session.get_outputs()[0].name
+
+
+def preprocess_image(image_bytes: bytes):
+    img = keras_image.load_img(BytesIO(image_bytes), target_size=IMG_SIZE)
+    img_array = keras_image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = tf.keras.applications.efficientnet.preprocess_input(img_array)
+    return img_array
 
 @app.get("/")
 async def root():
@@ -33,3 +63,32 @@ async def predict_hit(request: AirbnbSuperhost):
     x = dv_classification.transform([request.dict()])
     y_pred = model_classification.predict_proba(x)[0, 1]
     return {"probability": float(y_pred)}
+
+
+@app.post("/predict_room_keras")
+async def predict_room_keras(image: UploadFile = File(...)):
+    image_bytes = await image.read()
+    img = preprocess_image(image_bytes)
+    x = model_room_keras.predict(img)
+    predicted_class = class_names[np.argmax(x)]
+    confidence = np.max(x)
+    return {"room_type": str(predicted_class), "confidence": float(confidence)}
+
+
+@app.post("/predict_room_onnx")
+async def predict_room_onnx(image: UploadFile = File(...)):
+    image_bytes = await image.read()
+    img_tensor = preprocess_image(image_bytes)
+    mean = np.array([0.485, 0.456, 0.406], dtype=np.float32).reshape(1,1,1,3)  
+    std = np.array([0.229, 0.224, 0.225], dtype=np.float32).reshape(1,1,1,3)
+
+    input_feed = {
+        'input': img_tensor,  # Or whatever the image input name is
+        'sequential_1_1/efficientnetb0_1/normalization_1/Sub/y:0': mean,
+        'sequential_1_1/efficientnetb0_1/normalization_1/Sqrt/x:0': std
+    }
+    pred = ort_session.run([output_name], input_feed)[0]
+
+    predicted_class = class_names[np.argmax(pred)]
+    confidence = np.max(pred)
+    return {"room_type_onnx": str(predicted_class), "confidence_onnx": float(confidence)}

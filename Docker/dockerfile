@@ -8,6 +8,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY classification_model.bin /app/
 COPY regression_model.json /app/
+COPY cnn_room_classifier_effnet.keras /app/
+COPY cnn_room_classifier_effnet.onnx /app/
+
 COPY *.py /app/
 
 CMD ["uvicorn", "api_model_server:app", "--host", "0.0.0.0", "--port", "8000"]

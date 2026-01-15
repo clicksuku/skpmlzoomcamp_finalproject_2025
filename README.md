@@ -701,18 +701,18 @@ jupytext --to py notebooks/airbnb_classification.ipynb `
 
 `requirements.txt`
 
-'''
-pandas
-numpy
-scikit-learn
-matplotlib
-seaborn
-jupytext
-fastapi
-uvicorn
-pydantic
-joblib
-requests 
+
+- pandas
+- numpy
+- scikit-learn
+- matplotlib
+- seaborn
+- jupytext
+- fastapi
+- uvicorn
+- pydantic
+- joblib
+- requests 
 '''
 
 * * * * *

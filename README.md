@@ -1,7 +1,7 @@
 üè° Airbnb Vienna -- Price Prediction & Listing Classification System
 ===================================================================
 
-1\. Problem Statement
+0\. Problem Statement
 ---------------------
 
 The short-term rental market is highly competitive, and pricing or positioning a listing incorrectly can significantly impact occupancy and revenue. Hosts and property managers often struggle to determine:
@@ -25,7 +25,7 @@ The project follows an **end-to-end ML lifecycle**: data analysis ‚Üí modeling ‚
 
 * * * * *
 
-2\. Installation and Running the Project
+1\. Installation and Running the Project
 ----------------------------------------
 
 ## Running locally
@@ -44,7 +44,7 @@ The project follows an **end-to-end ML lifecycle**: data analysis ‚Üí modeling ‚
 
 * * * * *
 
-3\. Dataset and Project Details
+2\. Dataset and Project Details
 -------------------------------
 
 ### Dataset Source
@@ -92,6 +92,35 @@ The project follows an **end-to-end ML lifecycle**: data analysis ‚Üí modeling ‚
 -   Outlier removal using IQR
 
 -   One-hot encoding for categorical features
+
+* * * * *
+
+3\. Visualization 
+----------------------------------------
+
+- Histogram Plots
+- Box And Whisper Plots
+- Scatter Plots
+- Heatmap
+- Pie Chart
+
+
+  <img width="802" height="376" alt="image" src="https://github.com/user-attachments/assets/59284e38-403c-4bca-883c-32115f9a519e" />
+  <img width="755" height="421" alt="image" src="https://github.com/user-attachments/assets/60650228-3c2c-4024-846f-2b8049298660" />
+  <img width="781" height="540" alt="image" src="https://github.com/user-attachments/assets/4c3cd742-81cd-41df-bf1c-11ab8f4a308e" />
+  <img width="784" height="379" alt="image" src="https://github.com/user-attachments/assets/45243c17-92b5-4774-b0d4-08d2d39bcc40" />
+  <img width="809" height="416" alt="image" src="https://github.com/user-attachments/assets/a25b9a98-70be-4416-8600-e1be779a85d2" />
+  <img width="610" height="519" alt="image" src="https://github.com/user-attachments/assets/959e276a-00fe-4d3c-9338-68d732c61319" />
+  <img width="646" height="441" alt="image" src="https://github.com/user-attachments/assets/04e6af35-1092-429f-96da-f68b98db215d" />
+
+
+
+
+
+
+
+
+
 
 * * * * *
 
@@ -672,18 +701,18 @@ jupytext --to py notebooks/airbnb_classification.ipynb `
 
 `requirements.txt`
 
-'''
-pandas
-numpy
-scikit-learn
-matplotlib
-seaborn
-jupytext
-fastapi
-uvicorn
-pydantic
-joblib
-requests 
+
+- pandas
+- numpy
+- scikit-learn
+- matplotlib
+- seaborn
+- jupytext
+- fastapi
+- uvicorn
+- pydantic
+- joblib
+- requests 
 '''
 
 * * * * *

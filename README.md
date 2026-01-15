@@ -672,7 +672,8 @@ jupytext --to py notebooks/airbnb_classification.ipynb `
 
 `requirements.txt`
 
-`pandas
+'''
+pandas
 numpy
 scikit-learn
 matplotlib
@@ -682,7 +683,8 @@ fastapi
 uvicorn
 pydantic
 joblib
-requests `
+requests 
+'''
 
 * * * * *
 

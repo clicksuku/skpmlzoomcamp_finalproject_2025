@@ -1026,7 +1026,7 @@ curl -X POST http://<SERVICE_IP>/predict_price\
 | Points | Description                                                                                                            | Status |
 | :----: | :--------------------------------------------------------------------------------------------------------------------- | :----: |
 |    0   | No deployment to the cloud                                                                                             |        |
-|    1   | Documentation clearly describes (with code) how to deploy the service to cloud or Kubernetes cluster (local or remote) |   ✅    |
-|    2   | Code for cloud/Kubernetes deployment is available, with URL for testing or a video/screenshot of testing it            |     |
+|    1   | Documentation clearly describes (with code) how to deploy the service to cloud or Kubernetes cluster (local or remote) |        |
+|    2   | Code for cloud/Kubernetes deployment is available, with URL for testing or a video/screenshot of testing it            |   ✅   |
 
 ---

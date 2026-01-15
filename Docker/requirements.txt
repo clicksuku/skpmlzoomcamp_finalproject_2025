@@ -11,3 +11,7 @@ fastapi
 requests
 uvicorn
 tqdm
+onnxruntime
+tensorflow
+keras
+python-multipart

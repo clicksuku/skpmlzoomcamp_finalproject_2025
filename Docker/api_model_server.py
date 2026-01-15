@@ -1,7 +1,7 @@
 import pickle
 import xgboost as xgb
 import pandas as pd
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, Body
 from AirbnbProperty import AirbnbProperty
 from AirbnbSuperhost import AirbnbSuperhost
 
@@ -20,13 +20,13 @@ class_names = [
      'gameroom', 'garage', 'gym', 'kitchen', 'livingroom', 'lobby', 'meeting_room', 
      'office', 'pantry', 'restaurant', 'restaurant_kitchen', 'tv_studio', 'waitingroom']
 
-with open('classification_model.bin', 'rb') as f_in: # very important to use 'rb' here, it means read-binary 
+with open('../_models/classification_model.bin', 'rb') as f_in: # very important to use 'rb' here, it means read-binary 
     model_classification, dv_classification = pickle.load(f_in)
 
 model_regression = xgb.XGBRegressor()
-model_regression.load_model('regression_model.json')
+model_regression.load_model('../_models/regression_model.json')
 
-model_room_keras = tf.keras.models.load_model("cnn_room_classifier_effnet.keras")
+model_room_keras = tf.keras.models.load_model("../_models/cnn_room_classifier_effnet.keras")
 
 ort_session = ort.InferenceSession(
     "../_models/cnn_room_classifier_effnet.onnx",
@@ -66,8 +66,8 @@ async def predict_hit(request: AirbnbSuperhost):
 
 
 @app.post("/predict_room_keras")
-async def predict_room_keras(image: UploadFile = File(...)):
-    image_bytes = await image.read()
+async def predict_room_keras(image: bytes = Body(..., media_type="application/octet-stream")):
+    image_bytes = image
     img = preprocess_image(image_bytes)
     x = model_room_keras.predict(img)
     predicted_class = class_names[np.argmax(x)]
@@ -76,8 +76,8 @@ async def predict_room_keras(image: UploadFile = File(...)):
 
 
 @app.post("/predict_room_onnx")
-async def predict_room_onnx(image: UploadFile = File(...)):
-    image_bytes = await image.read()
+async def predict_room_onnx(image: bytes = Body(..., media_type="application/octet-stream")):
+    image_bytes = image
     img_tensor = preprocess_image(image_bytes)
     mean = np.array([0.485, 0.456, 0.406], dtype=np.float32).reshape(1,1,1,3)  
     std = np.array([0.229, 0.224, 0.225], dtype=np.float32).reshape(1,1,1,3)

@@ -103,9 +103,17 @@ img_path = ["../data_room_classifier/living_room.jpg",
 
 for i in range(4):
     image_path = img_path[i]
+    print(image_path)
     with open(image_path, 'rb') as image:
-        response = requests.post(url_room_keras, files={'image': image})
-    print(f"/predict_room status_code: {response.status_code}")
+        print(url_room_keras)
+        image_bytes = image.read()
+        response = requests.post(
+            url_room_keras,
+            data=image_bytes,
+            headers={'Content-Type': 'application/octet-stream'}
+        )
+        print(response)
+    print(f"/predict_room_keras status_code: {response.status_code}")
     try:
         print(response.json())
     except Exception:
@@ -117,8 +125,13 @@ for i in range(4):
 for i in range(4):
     image_path = img_path[i]
     with open(image_path, 'rb') as image:
-        response = requests.post(url_room_onnx, files={'image': image})
-    print(f"/predict_room status_code: {response.status_code}")
+        image_bytes = image.read()
+        response = requests.post(
+            url_room_onnx,
+            data=image_bytes,
+            headers={'Content-Type': 'application/octet-stream'}
+        )
+    print(f"/predict_room_onnx status_code: {response.status_code}")
     try:
         print(response.json())
     except Exception:

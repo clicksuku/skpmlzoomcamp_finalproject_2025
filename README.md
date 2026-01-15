@@ -740,11 +740,11 @@ jupytext --to py notebooks/airbnb_classification.ipynb `
 
 ### Build Docker Image
 
-`docker build -t skp-airbnb-vienna:latest . `
+`docker build -t mlcampfinal:latest .
 
 ### Run Container
 
-`docker run -p 8000:8000 skp-airbnb-vienna:latest `
+`docker run -p 8000:8000 mlcampfinal:latest `
 
 * * * * *
 
@@ -753,7 +753,7 @@ jupytext --to py notebooks/airbnb_classification.ipynb `
 
 ### Kubernetes Manifests
 
-Create `k8s/` directory with the following files:
+Create `Kubernetes/` directory with the following files:
 
 #### 1\. Deployment Configuration
 
@@ -819,14 +819,18 @@ spec:
 ```
 bash
 
+# minikube install and start with Docker as driver
+minikube start --driver=docker
+
+#minikube image load with Docker contents
+minikube image build -t mlcampfinal:latest .
+
 # Apply Kubernetes configurations
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 
 # Check deployment status
 kubectl get pods
-kubectl get services
-
 ```
 
 #### Kubectl port forward for the client to access
@@ -841,34 +845,11 @@ kubectl port-forward service/airbnb-vienna-service 8000:8000
 ```
 bash
 
-# Get service URL
-minikube service airbnb-vienna-service --url
-
-# Or for cloud providers
-kubectl get service airbnb-vienna-service
-
 # Test API endpoint
 
 '''
 python api_client.py
 '''
-
-'''
-curl -X POST http://<SERVICE_IP>/predict_price\
-  -H "Content-Type: application/json"\
-  -d '{
-    "property_type": "Apartment",
-    "room_type": "Entire home/apt",
-    "accommodates": 2,
-    "bedrooms": 1,
-    "bathrooms": 1.0,
-    "neighborhood": "Leopoldstadt",
-    "review_scores_rating": 92.5,
-    "amenities_count": 10,
-    "has_wifi": true,
-    "has_kitchen": true
-  }'
-```
 
 * * * * *
 

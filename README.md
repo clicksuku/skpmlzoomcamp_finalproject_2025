@@ -37,7 +37,7 @@
   - [Exported Artifact](#exported-artifact)
   - [Analysis of Approaches, Results, and Final Outcome](#analysis-of-approaches-results-and-final-outcome)
 - [6. Abandoned Project - CNN Project for Premium/Non-Premium Classification](#6-abandoned-project---cnn-project-for-premiumnon-premium-classification)
-- [7. CNN Project to identify Room Type - Multi class identification with Softmax function](#7-CNN Project to identify Room Type - Multi class identification with Softmax function)
+- [7. CNN Project to identify Room Type - Multi class identification with Softmax function](#7-cnn-project---to-identify-roomtype-multiclass-identification-with-softwax-function)
 - [8. Converting Jupyter Notebooks with Jupytext](#8-converting-jupyter-notebooks-with-jupytext)
 - [9. Requirements and Installation](#9-requirements-and-installation)
 - [10. FastAPI Deployment and Serving](#10-fastapi-deployment-and-serving)

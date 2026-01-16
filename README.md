@@ -25,7 +25,7 @@ The project follows an **end-to-end ML lifecycle**: data analysis → modeling �
 
 * * * * *
 
-0\. Project Structure (Repository Overview)
+Project Structure (Repository Overview)
 ------------------------------------------
 
 This document explains the structure of the repository and how the different folders/scripts connect end-to-end.
@@ -51,7 +51,6 @@ skpmlzoomcamp_finalproject_2025/
 └── uv.lock
 ```
 
----
 
 ## B. Folder-by-folder explanation
 
@@ -67,7 +66,6 @@ Typical contents (based on your README updates):
 
 This folder is the starting point for tabular ML.
 
----
 
 ### `data_room_classifier/`
 
@@ -89,7 +87,6 @@ data_room_classifier/
 
 This folder is the starting point for the CNN room classifier.
 
----
 
 ### `Notebook/`
 
@@ -108,8 +105,6 @@ Examples:
 - `airbnb_classification.ipynb`
 - `airbnb_cnn_roomtype_classification.ipynb`
 
----
-
 ### `scripts/`
 
 Contains Python scripts (exported/cleaned versions of notebook logic, plus helper utilities).
@@ -126,7 +121,6 @@ Examples (based on repo contents):
 - CNN scripts for room-type classification
 - `download_dataset.py`
 
----
 
 ### `_models/`
 
@@ -140,8 +134,6 @@ Typical artifacts in this project:
 - `regression_model.json` (XGBoost regression model)
 - `cnn_room_classifier_effnet.keras` (Keras CNN model)
 - `cnn_room_classifier_effnet.onnx` or `cnn_room_classifier_effnet_fixed.onnx` (ONNX export)
-
----
 
 ### `Docker/`
 
@@ -165,8 +157,6 @@ Contains:
 
 This folder is what you run when you want to serve the models.
 
----
-
 ### `Kubernetes/`
 
 Kubernetes deployment manifests for running the Docker image in a cluster.
@@ -182,8 +172,6 @@ Contains:
 
 This folder is used when deploying the API beyond local Docker.
 
----
-
 ### `Analysis/`
 
 Typically used for:
@@ -193,8 +181,6 @@ Typically used for:
 - intermediate analysis outputs
 
 (Your repo contains this folder; exact contents can evolve.)
-
----
 
 ### Root-level files
 
@@ -206,8 +192,6 @@ Typically used for:
   - Development dependencies (root-level)
 - `pyproject.toml` / `uv.lock`
   - Python project metadata / lockfile (if using `uv`)
-
----
 
 ## C. End-to-end workflow (how everything connects)
 
@@ -237,8 +221,6 @@ Typically used for:
 - `kubectl apply ...`
 - Verify pods + service
 - Port-forward or load balancer access
-
----
 
 ## D. Notes / conventions
 

@@ -116,12 +116,6 @@ The project follows an **end-to-end ML lifecycle**: data analysis â†’ modeling â
 
 
 
-
-
-
-
-
-
 * * * * *
 
 4\. Regression Model -- Price Prediction
@@ -674,7 +668,73 @@ This is later loaded by the FastAPI server for inference.
 
 * * * * *
 
-6\. Converting Jupyter Notebooks with Jupytext
+6\. **Abandoned Project** - CNN Project for Premium/Non-Premium Classification
+----------------------------------------------
+
+The primary objective was to automatically categorize real estate property images as either "Premium" or "Non-Premium" based on learned visual features. The project encompassed a complete machine learning pipeline, from dataset construction and label engineering to model implementation and performance assessment.
+
+**Methodology**
+
+**Data Acquisition and Preprocessing**\
+The initial phase involved constructing a labeled image dataset from a source dataset containing property listings. The preprocessing and labeling pipeline was executed as follows:
+
+- **Data Cleaning:** The raw dataset was cleansed to handle missing or inconsistent entries.
+
+- **Neighborhood Encoding:** Categorical `Neighborhood` data was converted into a machine-readable format.
+
+- **Label Generation (Premium/Non-Premium):** A heuristic rule-based system was implemented to generate ground truth labels. For each distinct neighborhood:
+
+o The 75th percentile was calculated for both listing price and review ratings.
+
+o Any property exceeding both the price and rating thresholds for its neighborhood was assigned a "Premium" label (`1`). All other properties were labeled "Non-Premium" (`0`).
+
+- **Image Dataset Compilation:** Using image URLs associated with each property, a balanced sample of approximately 300 images was downloaded and systematically stored in separate directories corresponding to their assigned `Premium` or `Non-Premium` class.
+
+**Model Architecture and Training**\
+A supervised learning approach was adopted using TensorFlow and Keras.
+
+- **Data Pipeline:** Images were loaded, resized, normalized, and split into distinct training and validation subsets to facilitate model training and prevent overfitting.
+
+- **Base Model & Transfer Learning:** The EfficientNetB0 architecture, pre-trained on the ImageNet dataset, was employed as a foundational feature extractor. This approach leverages learned hierarchical features from a large corpus of general images.
+
+- **Custom Classification Head:** On top of the frozen base model, a custom classification head was appended:
+
+o A global average pooling layer condensed the extracted feature maps.
+
+o A Dense layer with a ReLU activation function introduced non-linearity.
+
+o A final Dense layer with a sigmoid activation function produced a probabilistic output between 0 and 1, corresponding to the `Non-Premium` and `Premium` classes, respectively.
+
+- **Training Configuration:** The model was compiled using the Adam optimizer and binary cross-entropy loss function, suitable for binary classification tasks. It was subsequently fit on the training data, with performance monitored on the held-out validation set.
+
+**Evaluation and Analysis**\
+A separate test set of approximately 100 images (containing a mix of both classes) was compiled to evaluate the model's generalizability.
+
+- **Prediction:** The trained model generated prediction probabilities for each test image.
+
+- **Performance Metrics:** A comprehensive evaluation was conducted by analyzing the Confusion Matrix and Classification Report (precision, recall, F1-score) across various classification thresholds.
+
+- **Threshold Selection:** A classification threshold of 0.6 was empirically determined to offer an optimal balance of metrics. At this threshold, the model demonstrated satisfactory accuracy, recall, and precision for the `Non-Premium` class, and acceptable, though less robust, performance for the `Premium` class.
+
+**Conclusion and Future Work**
+
+The implemented CNN classifier successfully established a baseline for image-based property categorization. However, the final model performance, particularly regarding the `Premium` class, did not meet the target thresholds for reliable deployment. The heuristic labeling strategy, while practical, may not have generated sufficiently robust or accurate ground truth labels, directly impacting the model's learning capability. Furthermore, the limited size of the training dataset likely constrained the model's ability to learn discriminative features effectively.
+
+In essence,
+
+- Leveraged the Place365 Dataset but the data size was huge and required large disk space. (~30 GB). Could not process the same on Google Colab for the same reason
+
+- Tried Tensorflow Datasets place365_small which was also relatively large and processing was still a challenge.
+
+- Even after setting the above, the prediction results were not great.
+
+Despite the implementation of state-of-the-art CNN architectures, the heuristic method of labeling (based on price/review thresholds) introduced significant noise into the training labels. Due to the suboptimal convergence and limited predictive power observed during this phase, the decision was made to pivot the research focus toward a more viable project scope.
+
+@font-face {font-family:Wingdings; panose-1:5 0 0 0 0 0 0 0 0 0; mso-font-charset:2; mso-generic-font-family:decorative; mso-font-pitch:variable; mso-font-signature:3 268435456 0 0 -2147483647 0;}@font-face {font-family:"Cambria Math"; panose-1:2 4 5 3 5 4 6 3 2 4; mso-font-charset:0; mso-generic-font-family:roman; mso-font-pitch:variable; mso-font-signature:-536870145 1107305727 0 0 415 0;}@font-face {font-family:Aptos; panose-1:2 11 0 4 2 2 2 2 2 4; mso-font-charset:0; mso-generic-font-family:swiss; mso-font-pitch:variable; mso-font-signature:536871559 3 0 0 415 0;}p.MsoNormal, li.MsoNormal, div.MsoNormal {mso-style-unhide:no; mso-style-qformat:yes; mso-style-parent:""; margin-top:0in; margin-right:0in; margin-bottom:8.0pt; margin-left:0in; line-height:115%; mso-pagination:widow-orphan; font-size:12.0pt; font-family:"Aptos",sans-serif; mso-ascii-font-family:Aptos; mso-ascii-theme-font:minor-latin; mso-fareast-font-family:Aptos; mso-fareast-theme-font:minor-latin; mso-hansi-font-family:Aptos; mso-hansi-theme-font:minor-latin; mso-bidi-font-family:"Times New Roman"; mso-bidi-theme-font:minor-bidi; mso-font-kerning:1.0pt; mso-ligatures:standardcontextual;}code {mso-style-noshow:yes; mso-style-priority:99; font-family:"Courier New"; mso-ascii-font-family:"Courier New"; mso-fareast-font-family:"Times New Roman"; mso-hansi-font-family:"Courier New"; mso-bidi-font-family:"Courier New";}p.ds-markdown-paragraph, li.ds-markdown-paragraph, div.ds-markdown-paragraph {mso-style-name:ds-markdown-paragraph; mso-style-unhide:no; mso-margin-top-alt:auto; margin-right:0in; mso-margin-bottom-alt:auto; margin-left:0in; mso-pagination:widow-orphan; font-size:12.0pt; font-family:"Times New Roman",serif; mso-fareast-font-family:"Times New Roman";}.MsoChpDefault {mso-style-type:export-only; mso-default-props:yes; font-family:"Aptos",sans-serif; mso-ascii-font-family:Aptos; mso-ascii-theme-font:minor-latin; mso-fareast-font-family:Aptos; mso-fareast-theme-font:minor-latin; mso-hansi-font-family:Aptos; mso-hansi-theme-font:minor-latin; mso-bidi-font-family:"Times New Roman"; mso-bidi-theme-font:minor-bidi;}.MsoPapDefault {mso-style-type:export-only; margin-bottom:8.0pt; line-height:115%;}div.WordSection1 {page:WordSection1;}ol {margin-bottom:0in;}ul {margin-bottom:0in;}
+
+* * * * *
+
+8\. Converting Jupyter Notebooks with Jupytext
 ----------------------------------------------
 
 To ensure reproducibility and clean pipelines, notebooks were converted to scripts using **Jupytext**.
@@ -696,7 +756,7 @@ jupytext --to py notebooks/airbnb_classification.ipynb `
 
 * * * * *
 
-7\. Requirements and Installation
+9\. Requirements and Installation
 ---------------------------------
 
 `requirements.txt`
@@ -717,7 +777,7 @@ jupytext --to py notebooks/airbnb_classification.ipynb `
 
 * * * * *
 
-8\. FastAPI Deployment and Serving
+10\. FastAPI Deployment and Serving
 ----------------------------------
 
 ### Run API Locally
@@ -735,7 +795,7 @@ jupytext --to py notebooks/airbnb_classification.ipynb `
 
 * * * * *
 
-9\. Docker Deployment
+11\. Docker Deployment
 ---------------------
 
 ### Build Docker Image
@@ -748,7 +808,7 @@ jupytext --to py notebooks/airbnb_classification.ipynb `
 
 * * * * *
 
-10\. Kubernetes Deployment
+12\. Kubernetes Deployment
 -------------------------
 
 ### Kubernetes Manifests
@@ -795,7 +855,7 @@ spec:
             cpu: "500m"
 ```
 
-#### 2\. Service Configuration
+#### \. Service Configuration
 
 ```
 yaml
@@ -853,7 +913,7 @@ python api_client.py
 
 * * * * *
 
-10\. Project Characterestics
+13\. Project Characterestics
 -----------------------
 
 ### Business Impact
@@ -886,7 +946,7 @@ python api_client.py
 
 * * * * *
 
-11\. Project Highlights
+14\. Project Highlights
 -----------------------
 
 -   End-to-end ML lifecycle
@@ -901,7 +961,7 @@ python api_client.py
 
 * * * * *
 
-12\. Contributing
+15\. Contributing
 -----------------
 
 1.  Fork the repository
@@ -917,7 +977,7 @@ python api_client.py
 
 * * * * *
 
-## 13. Evaluation 
+## 16. Evaluation 
 
 
 ---

@@ -2,7 +2,7 @@
 ===================================================================
 
 0\. Problem Statement
----------------------
+------------------------------------------
 
 The short-term rental market is highly competitive, and pricing or positioning a listing incorrectly can significantly impact occupancy and revenue. Hosts and property managers often struggle to determine:
 
@@ -22,6 +22,230 @@ Classify listings into **Host vs Superhost** categories based on pricing, amenit
 This enables better market segmentation and pricing strategy insights.
 
 The project follows an **end-to-end ML lifecycle**: data analysis → modeling → evaluation → deployment using **FastAPI, Docker, and Kubernetes**.
+
+* * * * *
+
+0\. Project Structure (Repository Overview)
+------------------------------------------
+
+This document explains the structure of the repository and how the different folders/scripts connect end-to-end.
+
+---
+
+## A. High-level layout
+
+```text
+skpmlzoomcamp_finalproject_2025/
+├── Analysis/
+├── Data/
+├── data_room_classifier/
+├── Notebook/
+├── scripts/
+├── _models/
+├── Docker/
+├── Kubernetes/
+├── README.md
+├── readme_cnn.md
+├── requirements.txt
+├── pyproject.toml
+└── uv.lock
+```
+
+---
+
+## B. Folder-by-folder explanation
+
+### `Data/`
+
+Holds the Airbnb Vienna tabular data files used for regression/classification.
+
+Typical contents (based on your README updates):
+
+- `listings.csv`
+- `listings_detailed.csv`
+- `data_dictionary.xlsx`
+
+This folder is the starting point for tabular ML.
+
+---
+
+### `data_room_classifier/`
+
+Holds the image dataset used for CNN training and inference.
+
+Expected structure (as used in the notebook):
+
+```text
+data_room_classifier/
+├── train/
+│   ├── kitchen/
+│   ├── livingroom/
+│   └── ...
+└── test/
+    ├── kitchen/
+    ├── livingroom/
+    └── ...
+```
+
+This folder is the starting point for the CNN room classifier.
+
+---
+
+### `Notebook/`
+
+Contains Jupyter notebooks used for experimentation, EDA, training, and evaluation.
+
+In this project, the notebooks are the “research” layer where you:
+
+- Explore data
+- Prototype feature engineering
+- Train models
+- Validate results
+- Export model artifacts
+
+Examples:
+
+- `airbnb_classification.ipynb`
+- `airbnb_cnn_roomtype_classification.ipynb`
+
+---
+
+### `scripts/`
+
+Contains Python scripts (exported/cleaned versions of notebook logic, plus helper utilities).
+
+Purpose:
+
+- Make training reproducible without running notebooks
+- Enable automation (future: pipelines, CI, cron retraining)
+
+Examples (based on repo contents):
+
+- `airbnb_classification.py`
+- `airbnb_regression.py`
+- CNN scripts for room-type classification
+- `download_dataset.py`
+
+---
+
+### `_models/`
+
+Central folder for **trained model artifacts** used at inference time.
+
+This folder is important because both Docker/FastAPI serving and K8s deployment depend on these artifacts.
+
+Typical artifacts in this project:
+
+- `classification_model.bin` (classification model + DictVectorizer)
+- `regression_model.json` (XGBoost regression model)
+- `cnn_room_classifier_effnet.keras` (Keras CNN model)
+- `cnn_room_classifier_effnet.onnx` or `cnn_room_classifier_effnet_fixed.onnx` (ONNX export)
+
+---
+
+### `Docker/`
+
+Production-serving layer for running the inference API.
+
+Contains:
+
+- `api_model_server.py`
+  - FastAPI app
+  - Loads models from `_models/`
+  - Exposes endpoints for regression / classification / CNN
+- `api_client.py`
+  - Makes example requests to the API endpoints
+  - Useful for local testing
+- `AirbnbProperty.py`, `AirbnbSuperhost.py`
+  - Pydantic request schemas
+- `dockerfile`
+  - Builds the container image
+- `requirements.txt`
+  - Runtime dependencies (FastAPI, xgboost, tensorflow, etc.)
+
+This folder is what you run when you want to serve the models.
+
+---
+
+### `Kubernetes/`
+
+Kubernetes deployment manifests for running the Docker image in a cluster.
+
+Contains:
+
+- `deployment.yaml`
+  - Defines pod replicas and container image
+- `service.yaml`
+  - Exposes the deployment internally/externally
+- `README.md`
+  - `kubectl apply`, verify, port-forward commands
+
+This folder is used when deploying the API beyond local Docker.
+
+---
+
+### `Analysis/`
+
+Typically used for:
+
+- project artifacts
+- images/plots
+- intermediate analysis outputs
+
+(Your repo contains this folder; exact contents can evolve.)
+
+---
+
+### Root-level files
+
+- `README.md`
+  - Primary project documentation
+- `readme_cnn.md`
+  - Focused documentation for the CNN room classifier notebook
+- `requirements.txt`
+  - Development dependencies (root-level)
+- `pyproject.toml` / `uv.lock`
+  - Python project metadata / lockfile (if using `uv`)
+
+---
+
+## C. End-to-end workflow (how everything connects)
+
+### Step A: Train models (Notebook / scripts)
+
+- Tabular models:
+  - Work in `Notebook/airbnb_regression.ipynb` and `Notebook/airbnb_classification.ipynb` (or scripts)
+  - Export artifacts into `_models/`
+
+- CNN model:
+  - Work in `Notebook/airbnb_cnn_roomtype_classification.ipynb`
+  - Export artifacts into `_models/`
+
+### Step B: Serve models locally (FastAPI)
+
+- Run `Docker/api_model_server.py` with Uvicorn
+- Test with `Docker/api_client.py`
+
+### Step C: Containerize (Docker)
+
+- Build image using `Docker/dockerfile`
+- Run container and confirm endpoints
+
+### Step D: Deploy (Kubernetes)
+
+- Update `Kubernetes/deployment.yaml` to use your image tag
+- `kubectl apply ...`
+- Verify pods + service
+- Port-forward or load balancer access
+
+---
+
+## D. Notes / conventions
+
+- `_models/` is the single source of truth for inference artifacts.
+- `Notebook/` is for exploration; `scripts/` is for reproducible runs.
+- `Docker/` is the deployment unit for FastAPI serving.
+- `Kubernetes/` is the cluster deployment layer for that Docker image.
 
 * * * * *
 
@@ -730,9 +954,291 @@ In essence,
 
 Despite the implementation of state-of-the-art CNN architectures, the heuristic method of labeling (based on price/review thresholds) introduced significant noise into the training labels. Due to the suboptimal convergence and limited predictive power observed during this phase, the decision was made to pivot the research focus toward a more viable project scope.
 
-@font-face {font-family:Wingdings; panose-1:5 0 0 0 0 0 0 0 0 0; mso-font-charset:2; mso-generic-font-family:decorative; mso-font-pitch:variable; mso-font-signature:3 268435456 0 0 -2147483647 0;}@font-face {font-family:"Cambria Math"; panose-1:2 4 5 3 5 4 6 3 2 4; mso-font-charset:0; mso-generic-font-family:roman; mso-font-pitch:variable; mso-font-signature:-536870145 1107305727 0 0 415 0;}@font-face {font-family:Aptos; panose-1:2 11 0 4 2 2 2 2 2 4; mso-font-charset:0; mso-generic-font-family:swiss; mso-font-pitch:variable; mso-font-signature:536871559 3 0 0 415 0;}p.MsoNormal, li.MsoNormal, div.MsoNormal {mso-style-unhide:no; mso-style-qformat:yes; mso-style-parent:""; margin-top:0in; margin-right:0in; margin-bottom:8.0pt; margin-left:0in; line-height:115%; mso-pagination:widow-orphan; font-size:12.0pt; font-family:"Aptos",sans-serif; mso-ascii-font-family:Aptos; mso-ascii-theme-font:minor-latin; mso-fareast-font-family:Aptos; mso-fareast-theme-font:minor-latin; mso-hansi-font-family:Aptos; mso-hansi-theme-font:minor-latin; mso-bidi-font-family:"Times New Roman"; mso-bidi-theme-font:minor-bidi; mso-font-kerning:1.0pt; mso-ligatures:standardcontextual;}code {mso-style-noshow:yes; mso-style-priority:99; font-family:"Courier New"; mso-ascii-font-family:"Courier New"; mso-fareast-font-family:"Times New Roman"; mso-hansi-font-family:"Courier New"; mso-bidi-font-family:"Courier New";}p.ds-markdown-paragraph, li.ds-markdown-paragraph, div.ds-markdown-paragraph {mso-style-name:ds-markdown-paragraph; mso-style-unhide:no; mso-margin-top-alt:auto; margin-right:0in; mso-margin-bottom-alt:auto; margin-left:0in; mso-pagination:widow-orphan; font-size:12.0pt; font-family:"Times New Roman",serif; mso-fareast-font-family:"Times New Roman";}.MsoChpDefault {mso-style-type:export-only; mso-default-props:yes; font-family:"Aptos",sans-serif; mso-ascii-font-family:Aptos; mso-ascii-theme-font:minor-latin; mso-fareast-font-family:Aptos; mso-fareast-theme-font:minor-latin; mso-hansi-font-family:Aptos; mso-hansi-theme-font:minor-latin; mso-bidi-font-family:"Times New Roman"; mso-bidi-theme-font:minor-bidi;}.MsoPapDefault {mso-style-type:export-only; margin-bottom:8.0pt; line-height:115%;}div.WordSection1 {page:WordSection1;}ol {margin-bottom:0in;}ul {margin-bottom:0in;}
 
 * * * * *
+
+7\. CNN Project to identify Room Type - Multi class identification with Softmax function
+----------------------------------------------
+
+# Airbnb Vienna — CNN Room Type Classification (EfficientNet)
+
+This document summarizes the workflow implemented in:
+
+- `Notebook/airbnb_cnn_roomtype_classification.ipynb`
+
+The notebook builds an **image classifier** for predicting the **room type** from photos using **transfer learning** with EfficientNet.
+
+---
+
+## Problem Statement
+
+Airbnb-style listings often include many indoor photos. Automatically identifying the **type of room** (e.g., `kitchen`, `livingroom`, `dining_room`, etc.) enables:
+
+- Better listing understanding and content organization
+- Automatic tagging/search/filtering
+- Downstream analytics (e.g., “Which room photos correlate with higher prices?”)
+- Potential quality checks (e.g., missing required room images)
+
+### Task
+
+- **Type**: Multi-class image classification
+- **Input**: A room image
+- **Output**: One of **18 room classes**
+
+Classes used (from the dataset folder structure):
+
+- `closet`, `computerroom`, `corridor`, `dining_room`, `elevator`, `gameroom`, `garage`, `gym`, `kitchen`, `livingroom`, `lobby`, `meeting_room`, `office`, `pantry`, `restaurant`, `restaurant_kitchen`, `tv_studio`, `waitingroom`
+
+---
+
+## Dataset & Data Loading
+
+The dataset is stored as an image directory dataset with this structure:
+
+- `../data_room_classifier/train/<class_name>/*.jpg`
+- `../data_room_classifier/test/<class_name>/*.jpg`
+
+The notebook uses `tf.keras.preprocessing.image_dataset_from_directory`:
+
+- `IMG_SIZE = (224, 224)`
+- `BATCH_SIZE = 32`
+- `label_mode = "categorical"` (one-hot labels)
+
+Observed dataset sizes (as printed in the notebook run):
+
+- **Train**: 3861 images
+- **Test**: 621 images
+- **Classes**: 18
+
+### Notes on “analysis” for image datasets
+
+The primary “EDA” for an image classification dataset usually includes:
+
+- Checking class list consistency between train and test
+- Confirming counts per class (imbalance)
+- Visual inspection of sample images per class
+- Checking resolution, aspect ratio, and common artifacts
+
+In this notebook, the key dataset verification step is:
+
+- `train_ds.class_names` and `test_ds.class_names` match exactly
+
+---
+
+## Data Cleaning & Preprocessing
+
+For CNN-based classification, “cleaning” is primarily about ensuring consistent input tensors and handling variability.
+
+###  Resizing / batching
+
+Images are resized to `224x224` and batched.
+
+### Normalization
+
+The model uses:
+
+- `tf.keras.applications.efficientnet.preprocess_input`
+
+This applies EfficientNet-compatible preprocessing to input tensors.
+
+### Data augmentation
+
+A strong augmentation pipeline is applied during training:
+
+- Random horizontal flip
+- Random rotation (0.1)
+- Random zoom (0.1)
+- Random contrast (0.1)
+
+This helps reduce overfitting and improves generalization on varied room photos.
+
+---
+
+## Algorithm / Model Architecture
+
+### Transfer learning backbone: EfficientNetB0
+
+The notebook uses:
+
+- `EfficientNetB0(include_top=False, weights="imagenet", input_shape=(224,224,3))`
+
+This means:
+
+- The pretrained EfficientNet convolutional base is reused
+- A custom classification head is trained for the 18 classes
+
+###  Classification head
+
+A Sequential model is constructed:
+
+1. `data_augmentation`
+2. `EfficientNetB0` base model
+3. `GlobalAveragePooling2D`
+4. `Dense(256, relu)`
+5. `Dropout(0.5)`
+6. `Dense(NUM_CLASSES, softmax)`
+
+### Loss and optimizer
+
+Compiled with:
+
+- **Loss**: `categorical_crossentropy`
+- **Optimizer**: Adam
+  - Initial stage learning rate: `1e-3`
+  - Fine-tuning stage learning rate: `1e-4`
+- **Metric**: accuracy
+
+---
+
+## Training Strategy
+
+The notebook uses a two-stage training approach.
+
+###  Stage 1: Train only the head (frozen backbone)
+
+- `base_model.trainable = False`
+- Train for `EPOCHS = 15`
+
+Observed results during this stage:
+
+- Validation accuracy rises quickly and stabilizes around **~0.80**
+- Final epoch shown: **val_accuracy ~ 0.8084**
+
+### Stage 2: Fine-tuning (unfreeze top EfficientNet layers)
+
+Fine-tuning configuration:
+
+- `base_model.trainable = True`
+- Freeze all but the top ~50 layers:
+  - `for layer in base_model.layers[:-50]: layer.trainable = False`
+- Re-compile with smaller LR `1e-4`
+- Train for `fine_tune_epochs = 10`
+
+Observed results in fine-tuning:
+
+- Accuracy on train increases substantially (up to ~0.94 shown)
+- Validation accuracy remains around **~0.81**
+
+Interpretation:
+
+- Fine-tuning improves fit on training data.
+- Validation accuracy does not improve dramatically, indicating limited generalization gains (likely due to dataset size, class imbalance, or visual similarity between classes).
+
+---
+
+##  Evaluation & Results
+
+The notebook evaluates using:
+
+- `classification_report` (precision/recall/F1 per class)
+- Confusion-matrix-style analysis via predictions over `test_ds`
+
+###  Overall performance
+
+From the printed `classification_report`:
+
+- **Accuracy**: **0.81** (621 test images)
+- **Macro avg F1**: **0.79**
+- **Weighted avg F1**: **0.81**
+
+###  Class-level observations (selected)
+
+Strong classes (high precision/recall):
+
+- `closet`: very high performance
+- `kitchen`: strong (precision ~0.80, recall ~0.92)
+- `pantry`: very high
+- `gym`: very high
+
+Weaker classes (low support and/or visually ambiguous):
+
+- `corridor`, `office`, `computerroom`
+
+These have small support counts and may require:
+
+- More data
+- Better class definitions
+- Additional augmentation
+- Potential merging of similar classes
+
+---
+
+## Exporting the Model
+
+###  Keras model export
+
+The notebook saves the trained Keras model to:
+
+- `../_models/cnn_room_classifier_effnet.keras`
+
+This is the artifact later used for inference.
+
+### Inference tests on sample images
+
+The notebook tests predictions on local sample images such as:
+
+- `living_room.jpg`
+- `dining_room.jpg`
+- `Kitchen.jpg`, `Kitchen1.jpg`, `Kitchen2.jpg`
+
+Example outcomes shown:
+
+- `Kitchen.jpg` -> predicted `kitchen` with very high confidence (~99%+)
+- Some non-kitchen images show lower confidence and confusion (expected with similar indoor scenes).
+
+---
+
+## ONNX Conversion & ONNX Runtime Testing
+
+The notebook attempts ONNX export using `tf2onnx`:
+
+- Loads the Keras model
+- Wraps a serving function
+- Converts with `opset=13`
+
+Output path (as shown):
+
+- `../_models/cnn_room_classifier_effnet_fixed.onnx`
+
+Then it tests ONNX inference using `onnxruntime.InferenceSession`.
+
+### Important note
+
+The ONNX model used for runtime inference in the notebook is:
+
+- `../_models/cnn_room_classifier_effnet.onnx`
+
+The notebook also uses a multi-input feed for EfficientNet normalization nodes:
+
+- `input`
+- `.../Sub/y:0` (mean)
+- `.../Sqrt/x:0` (std)
+
+This explains why ONNX inference needs extra inputs beyond the image tensor.
+
+---
+
+# Takeaways
+
+## Key takeaways
+
+- **Transfer learning works well** on a moderate-sized dataset: ~0.81 test accuracy across 18 classes.
+- **Data augmentation** is essential for robustness.
+- Fine-tuning improves training accuracy strongly but yields **limited validation gains**, suggesting dataset constraints.
+- Some classes are easy (`kitchen`, `closet`, `pantry`), while others are **hard/ambiguous** (`corridor`, `office`, `computerroom`).
+
+## Practical improvements (next iterations)
+
+- Add class distribution analysis + class weights (import exists but not used in training loop).
+- Introduce a clearer train/val split (currently test set is used as validation during training).
+- Use callbacks:
+  - `EarlyStopping`
+  - `ReduceLROnPlateau`
+  - `ModelCheckpoint`
+- Consider increasing input size (e.g., 256/299) if compute allows.
+- Consider cleaning/standardizing the ONNX export so the deployed ONNX model has a single input tensor (or document the required extra inputs clearly).
+
+
 
 8\. Converting Jupyter Notebooks with Jupytext
 ----------------------------------------------

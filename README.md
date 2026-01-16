@@ -1,6 +1,59 @@
 🏡 Airbnb Vienna -- Price Prediction & Listing Classification System
 ===================================================================
 
+## Table of Contents
+
+- [0. Problem Statement](#0-problem-statement)
+- [1. Installation and Running the Project](#1-installation-and-running-the-project)
+  - [Running locally](#running-locally)
+  - [Clone the Repository](#clone-the-repository)
+  - [Create Virtual Environment](#create-virtual-environment)
+  - [Install Dependencies](#install-dependencies)
+- [2. Dataset and Project Details](#2-dataset-and-project-details)
+  - [Dataset Source](#dataset-source)
+  - [Key Dataset Files](#key-dataset-files)
+  - [Key Features Used](#key-features-used)
+  - [Data Preprocessing](#data-preprocessing)
+- [3. Visualization](#3-visualization)
+- [4. Regression Model -- Price Prediction](#4-regression-model----price-prediction)
+  - [Objective](#objective)
+  - [Target Variable](#target-variable)
+  - [Models Implemented](#models-implemented)
+  - [Evaluation Metrics](#evaluation-metrics)
+  - [Model Selection](#model-selection)
+- [5. Classification Model -- Host vs Superhost Listings](#5-classification-model----host-vs-superhost-listings)
+  - [Objective](#objective-1)
+  - [Target Definition](#target-definition)
+  - [Models Implemented](#models-implemented-1)
+  - [Data Loading](#data-loading)
+  - [Feature Set Definition](#feature-set-definition)
+  - [Data Cleaning & Feature Engineering](#data-cleaning--feature-engineering)
+  - [Train/Validation/Test Split](#trainvalidationtest-split)
+  - [Baseline Model](#baseline-model)
+  - [Threshold / Precision-Recall Analysis](#threshold--precision-recall-analysis)
+  - [Cross-Validation for Regularization (C)](#cross-validation-for-regularization-c)
+  - [GridSearchCV (Final Model Selection)](#gridsearchcv-final-model-selection)
+  - [Final Evaluation (Validation Set)](#final-evaluation-validation-set)
+  - [Exported Artifact](#exported-artifact)
+  - [Analysis of Approaches, Results, and Final Outcome](#analysis-of-approaches-results-and-final-outcome)
+- [6. Abandoned Project - CNN Project for Premium/Non-Premium Classification](#6-abandoned-project---cnn-project-for-premiumnon-premium-classification)
+- [8. Converting Jupyter Notebooks with Jupytext](#8-converting-jupyter-notebooks-with-jupytext)
+- [9. Requirements and Installation](#9-requirements-and-installation)
+- [10. FastAPI Deployment and Serving](#10-fastapi-deployment-and-serving)
+  - [Run API Locally](#run-api-locally)
+  - [Available Endpoints](#available-endpoints)
+- [11. Docker Deployment](#11-docker-deployment)
+- [12. Kubernetes Deployment](#12-kubernetes-deployment)
+  - [Kubernetes Manifests](#kubernetes-manifests)
+  - [Deployment Commands](#deployment-commands)
+  - [Testing Kubernetes Deployment](#testing-kubernetes-deployment)
+- [13. Project Characterestics](#13-project-characterestics)
+- [14. Project Highlights](#14-project-highlights)
+- [15. Contributing](#15-contributing)
+- [16. Evaluation](#16-evaluation)
+
+* * * * *
+
 0\. Problem Statement
 ------------------------------------------
 
@@ -1395,7 +1448,6 @@ bash
 
 # Test API endpoint
 
-'''
 python api_client.py
 '''
 

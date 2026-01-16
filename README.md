@@ -1449,6 +1449,36 @@ kubectl port-forward service/airbnb-vienna-service 8000:8000
 python api_client.py
 '''
 
+### Screenshots
+
+#### Minikube Start with Docker driver
+<img width="1144" height="296" alt="image" src="https://github.com/user-attachments/assets/7e35519f-452c-49a4-bd9d-75cea7ca1aa1" />
+#### Minikube Image ls to show the loaded Docker image into Minikube Cache
+<img width="615" height="254" alt="image" src="https://github.com/user-attachments/assets/1c4ad594-2259-42e0-b2c6-6754388ebbe1" />
+#### Before Deployment
+<img width="887" height="103" alt="image" src="https://github.com/user-attachments/assets/578dc60d-eaac-4aff-9dde-3079e870a472" />
+#### Applying YAMLs 
+<img width="672" height="101" alt="image" src="https://github.com/user-attachments/assets/1a8e501d-4e24-4a01-82a1-80d148dcac9f" />
+#### After Deployment
+<img width="1067" height="343" alt="image" src="https://github.com/user-attachments/assets/8fbc8372-ccd0-41b4-84d7-636ec1a07470" />
+#### Running the port forward for the API client to hit
+<img width="717" height="104" alt="image" src="https://github.com/user-attachments/assets/2052bbbb-3aa8-45f0-a0f6-ec7441f60f71" />
+#### Regression run from Api Client
+<img width="1440" height="356" alt="image" src="https://github.com/user-attachments/assets/63fc3ac1-16b9-455b-aff6-ebfd46ca199f" />
+#### Classification run from Api Client for Superhost
+<img width="640" height="211" alt="image" src="https://github.com/user-attachments/assets/6cce9029-72a8-4aed-b9db-acf95cd8edcd" />
+#### Identifying the Room type - With Model stored in Keras format
+<img width="720" height="193" alt="image" src="https://github.com/user-attachments/assets/90809c10-e499-487f-9ff8-9c7ac1760d44" />
+#### Identifying the Room type - With Model stored in ONNX format
+<img width="974" height="532" alt="image" src="https://github.com/user-attachments/assets/ac5a4cfb-590c-4fed-b230-46e1e981a25f" />
+
+
+
+
+
+
+
+
 * * * * *
 
 13\. Project Characterestics

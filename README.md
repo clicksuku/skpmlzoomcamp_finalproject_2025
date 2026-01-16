@@ -1443,11 +1443,9 @@ kubectl port-forward service/airbnb-vienna-service 8000:8000
 
 ### Testing Kubernetes Deployment
 
-```
-bash
 
-# Test API endpoint
-
+#### Test API endpoint
+'''
 python api_client.py
 '''
 
